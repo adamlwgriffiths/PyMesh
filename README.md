@@ -4,17 +4,19 @@ PyMesh
 PyMesh provides functions to process a number of mesh formats and return data in a format that is simple to read and
 process.
 
-PyMesh is NOT a grand-unified mesh loader.
+__PyMesh helps you get up and running quickly.__
 
 Using a single data structure to represent all loaded mesh formats is not just a headache for us, but one for you.
+
 Many times I've found myself wanting to load a simple mesh, and finding the data caught up in a scene graph with lights, camera and complex materials which are all irrelevant.
-PyMesh helps you get up and running quickly.
 
-PyMesh is NOT a 3D library.
+This also means that as new mesh formats and features are added, existing code will not be affected.
 
-It just processes the data and exposes it in a format that is easy for you to process.
+
+__PyMesh is a good foundation for a 3D library.__
+
+PyMesh processes mesh formats and exposes them in a format that is easy for you to process.
 Because PyMesh doesn't do any 3D graphics, it is platform and library independent.
-PyMesh is a good foundation for a 3D library.
 
 
 Features
