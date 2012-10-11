@@ -625,7 +625,9 @@ class OBJ_Data( object ):
 
     def _parse_usemap( self, statement ):
         # there should only be 1 texture value
-        type, value = statement.split()
+        # any spaces in the arguments are part of the
+        # name itself and not delimiters
+        type, value = statement.split( None, 1 )
 
         # push the current mesh and begin a new one
         # don't copy the mesh if we haven't actually set
@@ -648,7 +650,9 @@ class OBJ_Data( object ):
 
     def _parse_usemtl( self, statement ):
         # there should only be 1 texture value
-        type, value = statement.split()
+        # any spaces in the arguments are part of the
+        # name itself and not delimiters
+        type, value = statement.split( None, 1 )
 
         # push the current mesh and begin a new one
         # don't copy the mesh if we haven't actually set
@@ -685,6 +689,9 @@ class OBJ_Data( object ):
         raise NotImplementedError( stack()[0][3] )
 
     def _parse_vp( self, statement ):
+        raise NotImplementedError( stack()[0][3] )
+
+    def _parse_fo( self, statement ):
         raise NotImplementedError( stack()[0][3] )
 
     def _parse_cstype( self, statement ):
@@ -897,7 +904,9 @@ class OBJ( object ):
                 # concatenate lines until we get a full statement
                 while line.endswith( '\\' ):
                     try:
-                        line += gen.next()
+                        # remove the \ token
+                        # add some white space
+                        line = line[:-1].strip() + ' ' + gen.next()
                     except:
                         raise EOFError( 'Line had a continuation but no following line to concatenate with' )
 
