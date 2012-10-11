@@ -1,0 +1,100 @@
+# ****************************************************************************
+#
+#  Kamakazi Kube.obj
+#  v1.1
+#
+#  This is a one of a suite of test-case .obj files, that I created to ferret
+#  out Import issues in 3D applications while working on my 'Riptide' .obj
+#  import/export plugin for Cinema4D by Maxon...
+#
+#  For more information on the tests, you can visit this link:
+#
+#               http://www.skinprops.com/fr_kamakazi.htm
+#
+#  The goal is to be able to read/import this file, intact and without errors.
+#  You should end up with a unit-cube, with each of the 6 faces assigned a
+#  separate (and uniquely colored) material.
+#
+#  The original test was comprised of just one .obj file with all the test
+#  conditions in it... I've now broken that up into individual test files to
+#  make it easier to know what's failing without having to edit the .obj file.
+#
+#
+#  Keith Young
+#  Red-i Productions
+#  typhoon[AT]charter.net
+#  http://www.skinprops.com
+#
+# ****************************************************************************
+
+#==========================================================================
+#			Spaces In Material Filename
+#==========================================================================
+#
+# This file tests support for having spaces within the name of the material
+# file...
+#==========================================================================
+mtllib Kube_nospace.mtl
+
+g Cube
+v -0.10000000 -0.10000000 0.10000000
+v -0.10000000 0.10000000 0.10000000
+v 0.10000000 -0.10000000 0.10000000
+v 0.10000000 0.10000000 0.10000000
+v 0.10000000 -0.10000000 -0.10000000
+v 0.10000000 0.10000000 -0.10000000
+v -0.10000000 -0.10000000 -0.10000000
+v -0.10000000 0.10000000 -0.10000000
+# 8 vertices
+
+vt 0.00000000 0.00000000
+vt 0.00000000 1.00000000
+vt 1.00000000 1.00000000
+vt 1.00000000 0.00000000
+vt 0.00000000 0.00000000
+vt 0.00000000 1.00000000
+vt 1.00000000 1.00000000
+vt 1.00000000 0.00000000
+vt 0.00000000 0.00000000
+vt 0.00000000 1.00000000
+vt 1.00000000 1.00000000
+vt 1.00000000 0.00000000
+vt 0.00000000 0.00000000
+vt 0.00000000 1.00000000
+vt 1.00000000 1.00000000
+vt 1.00000000 0.00000000
+vt 0.00000000 0.00000000
+vt 1.00000000 0.00000000
+vt 0.00000000 1.00000000
+vt 1.00000000 1.00000000
+# 20 texture coordinates
+
+usemtl Red
+f 5/8 6/7 4/6 3/5
+usemtl Green
+f 3/4 4/3 2/2 1/1
+usemtl Blue
+f 4/18 6/7 8/14 2/17
+usemtl Red_Blue
+f 7/12 8/11 6/10 5/9
+usemtl Green_Red
+#==========================================================================
+#			Non-Standard-Slashing
+#==========================================================================
+#
+# some apps add a trailing / when there is no Normal index... (MakeHuman.exe
+# even writes out 2 trailing slashes, if there's no texture or normal indices...)
+#
+# If this fails, you'll be missing the Green Red (Yellow, bottom) face, in which
+# case, you can use the Fix line instead.
+#
+# Fix line:
+#
+# f 5/8 3/20 1/19 7/13
+#
+#==========================================================================
+f 5/8/ 3/20/ 1/19/ 7/13/
+
+usemtl Blue_Green
+f 1/16 2/15 8/14 7/13
+# 6 facets

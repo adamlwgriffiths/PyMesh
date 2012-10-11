@@ -1,0 +1,25 @@
+
+         Red-i Productions Presents:
+           Kamakazi Kube Project
+Wavefront .Obj Import Compliancy/Robustness Test File
+              by Keith Young
+             (a.k.a. Spanki)
+         http://www.skinprops.com
+
+
+Kube1.obj - Spaces in .mtl Filename
+Kube2.obj - Line-continuation
+Kube3.obj - Whitespace
+Kube4.obj - Spaces in Material Names
+Kube5.obj - Obsolete Facet Record
+Kube6.obj - Non-Standard-Slashing (in facet records)
+Kube7.obj - Negative/Relative Indexing
+
+
+For details, please read the article at this link:
+
+http://www.skinprops.com/fr_kamakazi.htm
+
+Thanks,
+
+Keith

@@ -1,0 +1,110 @@
+# ****************************************************************************
+#
+#  Kamakazi Kube.obj
+#  v1.1
+#
+#  This is a one of a suite of test-case .obj files, that I created to ferret
+#  out Import issues in 3D applications while working on my 'Riptide' .obj
+#  import/export plugin for Cinema4D by Maxon...
+#
+#  For more information on the tests, you can visit this link:
+#
+#               http://www.skinprops.com/fr_kamakazi.htm
+#
+#  The goal is to be able to read/import this file, intact and without errors.
+#  You should end up with a unit-cube, with each of the 6 faces assigned a
+#  separate (and uniquely colored) material.
+#
+#  The original test was comprised of just one .obj file with all the test
+#  conditions in it... I've now broken that up into individual test files to
+#  make it easier to know what's failing without having to edit the .obj file.
+#
+#
+#  Keith Young
+#  Red-i Productions
+#  typhoon[AT]charter.net
+#  http://www.skinprops.com
+#
+# ****************************************************************************
+
+mtllib Kube_withspace.mtl
+
+g Cube
+v -0.10000000 -0.10000000 0.10000000
+v -0.10000000 0.10000000 0.10000000
+v 0.10000000 -0.10000000 0.10000000
+v 0.10000000 0.10000000 0.10000000
+v 0.10000000 -0.10000000 -0.10000000
+v 0.10000000 0.10000000 -0.10000000
+v -0.10000000 -0.10000000 -0.10000000
+v -0.10000000 0.10000000 -0.10000000
+# 8 vertices
+
+vt 0.00000000 0.00000000
+vt 0.00000000 1.00000000
+vt 1.00000000 1.00000000
+vt 1.00000000 0.00000000
+vt 0.00000000 0.00000000
+vt 0.00000000 1.00000000
+vt 1.00000000 1.00000000
+vt 1.00000000 0.00000000
+vt 0.00000000 0.00000000
+vt 0.00000000 1.00000000
+vt 1.00000000 1.00000000
+vt 1.00000000 0.00000000
+vt 0.00000000 0.00000000
+vt 0.00000000 1.00000000
+vt 1.00000000 1.00000000
+vt 1.00000000 0.00000000
+vt 0.00000000 0.00000000
+vt 1.00000000 0.00000000
+vt 0.00000000 1.00000000
+vt 1.00000000 1.00000000
+# 20 texture coordinates
+
+#==========================================================================
+#			Spaces in Material Names
+#==========================================================================
+#
+# ...so now I want to test "spaces in material names".  Assuming the program
+# actually finds the material file (listed above), ideally, it would also
+# figure out that there are *6* materials listed below -
+#
+# Red
+# Green
+# Blue
+# Red Blue    (Pink)
+# Green Red   (Yellow)
+# Blue Green  (Aqua)
+#
+# ...If the app doesn't support spaces in material names, you'll end up with
+# 3 materials (Red, Green, Blue), but they might actually show up in the app
+# with the wrong colors (Pink, Yellow and Aqua) assigned to them.
+#
+# NOTE: I have yet to find a definitive specification on .mtl files in general,
+#       and the .obj file format spec doesn't specify one way or the other as
+#       to whether or not material names can have spaces in them (or whether
+#       polygons can belong to more than one material group at a time, which
+#       would be the other way to interpret multiple strings on this record).
+#
+#       But some apps do allow the creation of material names with spaces in
+#       them, so I wanted to cover that.  In my code, I can read/import these
+#       fine, but when exporting, I treat them as a single material name and
+#       I replace the space with an underscore, so other apps can read them.
+#     (note that these changes have to get propogated to the .mtl file as well).
+#
+#==========================================================================
+
+usemtl Red
+f 5/8 6/7 4/6 3/5
+usemtl Green
+f 3/4 4/3 2/2 1/1
+usemtl Blue
+f 4/18 6/7 8/14 2/17
+usemtl Red Blue
+f 7/12 8/11 6/10 5/9
+usemtl Green Red
+f 5/8 3/20 1/19 7/13
+usemtl Blue Green
+f 1/16 2/15 8/14 7/13
+# 6 facets
