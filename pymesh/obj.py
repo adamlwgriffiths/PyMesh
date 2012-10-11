@@ -274,6 +274,7 @@ class OBJ_Data( object ):
     cdc v1 v2 v3 v4 v5 ...
     cdp v1 v2 v3 ... v16
     res useg vseg
+    fo v1 v2 ... vn
 
 
     Unsupported Non-standard statements:
