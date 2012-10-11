@@ -419,7 +419,7 @@ class OBJ_Data( object ):
         for malformed or unexpected data.
         """
         # get the statement type
-        values = statement.split( None )
+        values = statement.split()
 
         type = values[ 0 ]
         if len(values) > 1:
@@ -439,8 +439,7 @@ class OBJ_Data( object ):
 
     def _parse_v( self, statement ):
         type, values = statement.split( None, 1 )
-        values = values.split( None )
-        print values
+        values = values.split()
         # convert to float and a list
         floats = map( float, values )
         # append to our vertices
@@ -449,7 +448,7 @@ class OBJ_Data( object ):
 
     def _parse_vt( self, statement ):
         type, values = statement.split( None, 1 )
-        values = values.split( None )
+        values = values.split()
         # convert to float and a list
         floats = map( float, values )
         # append to our vertices
@@ -458,73 +457,102 @@ class OBJ_Data( object ):
 
     def _parse_vn( self, statement ):
         type, values = statement.split( None, 1 )
-        values = values.split( None )
+        values = values.split()
         # convert to float and a list
         floats = map( float, values )
         # append to our vertices
         # this will append a list inside our vertices list
         self.normals.append( floats )
 
-    def _parse_p( self, statement ):
-        type, values = statement.split( None, 1 )
-        values = values.split( None )
-        # convert to integer and a list
-        ints = map( int, values )
-
-        # convert negative indicies to absolute indices
-        def convert( value ):
+    def _convert_indice( self, value ):
+        """Converts a parsed indice value to an absolute
+        index. Also handles '' and None values that result
+        from string splitting or list buffering.
+        """
+        # convert from offset to absolute indice
+        if value == None:
+            return value
+        elif value == '':
+            return None
+        else:
+            value = int(value)
             if value < 0:
                 value = len( self.vertices ) + value
             return value
-        abs_ints = map( convert, ints )
+
+    def _convert_indices( self, values ):
+        """Converts a list of OBJ indices in the format v/vt/vn
+        into absolute indices.
+
+        Each vertex returned will contain 3 values.
+        No index is indicated by the None value.
+        """
+        # iterate through each set of vertices and
+        # convert to a list of 3 values
+        # [ vertex, texture coord, normal ]
+        # this will be an absolute indice, or None
+        # if no indice is provided
+        # faces can have vertex, texture coord and normal
+        # it is invalid to mix vertex definitions
+        # but we don't validate that here
+        result = []
+        for value in values:
+            indices = value.split( '/' )
+
+            # ensure we have 3 padded values
+            indices.extend( [None] * (3 - len(indices)) )
+
+            indices = map( self._convert_indice, indices )
+
+            # append to mesh
+            result.append( indices )
+        return result
+
+    def _parse_p( self, statement ):
+        type, values = statement.split( None, 1 )
+        values = values.split()
 
         # ensure we have a current mesh
         self._ensure_current_mesh()
+        
+        # convert our indices to integers and absolute
+        # values
+        indices = self._convert_indices( values )
 
         # append to mesh
-        self._current_mesh[ 'points' ].append( abs_ints )
+        self._current_mesh[ 'points' ].extend( indices )
 
     def _parse_l( self, statement ):
         type, values = statement.split( None, 1 )
-        values = values.split( None )
-        # convert to integer and a list
-        ints = map( int, values )
-
-        # convert negative indicies to absolute indices
-        def convert( value ):
-            if value < 0:
-                value = len( self.vertices ) + value
-            return value
-        abs_ints = map( convert, ints )
+        values = values.split()
 
         # ensure we have a current mesh
         self._ensure_current_mesh()
 
+        # convert our indices to integers and absolute
+        # values
+        indices = self._convert_indices( values )
+
         # append to mesh
-        self._current_mesh[ 'lines' ].append( abs_ints )
+        self._current_mesh[ 'lines' ].extend( indices )
 
     def _parse_f( self, statement ):
         type, values = statement.split( None, 1 )
-        values = values.split( None )
-        # convert to integer and a list
-        ints = map( int, values )
-
-        # convert negative indicies to absolute indices
-        def convert( value ):
-            if value < 0:
-                value = len( self.vertices ) + value
-            return value
-        abs_ints = map( convert, ints )
+        values = values.split()
 
         # ensure we have a current mesh
         self._ensure_current_mesh()
 
+        # convert our indices to integers and absolute
+        # values
+        indices = self._convert_indices( values )
+
         # append to mesh
-        self._current_mesh[ 'faces' ].append( abs_ints )
+        self._current_mesh[ 'faces' ].extend( indices )
 
     def _parse_o( self, statement ):
         # there should only be 1 name value
-        type, value = statement.split( None )
+        type, value = statement.split()
 
         # push the current mesh and begin a new one
         # don't copy the mesh if we haven't actually set
@@ -544,7 +572,7 @@ class OBJ_Data( object ):
     def _parse_g( self, statement ):
         # g can have 0 arguments
         # if 0 arguments are supplied, the group is 'default'
-        values = statement.split( None )
+        values = statement.split()
         type = values[ 0 ]
 
         if len(values) > 1:
@@ -569,7 +597,7 @@ class OBJ_Data( object ):
 
     def _parse_s( self, statement ):
         # there should only be 1 smoothing group value
-        type, value = statement.split( None )
+        type, value = statement.split()
 
         # push the current mesh and begin a new one
         # don't copy the mesh if we haven't actually set
@@ -590,14 +618,14 @@ class OBJ_Data( object ):
 
     def _parse_maplib( self, statement ):
         type, values = statement.split( None, 1 )
-        values = values.split( None )
+        values = values.split()
 
         # store the specified texture maps in our list
         self.textures.update( values )
 
     def _parse_usemap( self, statement ):
         # there should only be 1 texture value
-        type, value = statement.split( None )
+        type, value = statement.split()
 
         # push the current mesh and begin a new one
         # don't copy the mesh if we haven't actually set
@@ -613,14 +641,14 @@ class OBJ_Data( object ):
 
     def _parse_mtllib( self, statement ):
         type, values = statement.split( None, 1 )
-        values = values.split( None )
+        values = values.split()
 
         # store the specified material files
         self.materials.update( values )
 
     def _parse_usemtl( self, statement ):
         # there should only be 1 texture value
-        type, value = statement.split( None )
+        type, value = statement.split()
 
         # push the current mesh and begin a new one
         # don't copy the mesh if we haven't actually set
@@ -641,14 +669,14 @@ class OBJ_Data( object ):
 
     def _parse_shadow_obj( self, statement ):
         # there should only be 1 shadow value
-        type, values = statement.split( None )
+        type, values = statement.split()
 
         # set the name of the mesh
         self.shadow = values
 
     def _parse_trace_obj( self, statement ):
         # there should only be 1 shadow value
-        type, values = statement.split( None )
+        type, values = statement.split()
 
         # set the name of the mesh
         self.trace = values
@@ -741,6 +769,9 @@ class OBJ_Data( object ):
         raise NotImplementedError( stack()[0][3] )
 
     def _parse_lp( self, statement ):
+        raise NotImplementedError( stack()[0][3] )
+
+    def _parse_lq( self, statement ):
         raise NotImplementedError( stack()[0][3] )
 
     def _parse_ld( self, statement ):
@@ -892,7 +923,7 @@ class OBJ( object ):
             # there are some statements with 0 parameters
             # such as  'g'
             # so we need to extract the specific values later
-            values = line.split( None )
+            values = line.split()
 
             # get the first word
             # this is the statement type
