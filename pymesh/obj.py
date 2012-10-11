@@ -686,106 +686,174 @@ class OBJ_Data( object ):
         self.trace = values
 
     def _parse_csh( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_vp( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_fo( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_cstype( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_deg( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_bmat( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_step( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_curv( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_curv2( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_surf( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_parm( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_trim( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_hole( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_scrv( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_sp( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_end( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_con( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_mg( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_bevel( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_c_interp( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_d_interp( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_lod( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_ctech( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_stech( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_bsp( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_bzp( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_cdc( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_res( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_pl( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_sp( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_lp( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_lq( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_ld( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
     def _parse_c( self, statement ):
-        raise NotImplementedError( stack()[0][3] )
+        raise NotImplementedError(
+            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
+            )
 
 
 class OBJ( object ):
@@ -965,7 +1033,7 @@ class OBJ( object ):
             try:
                 data.parse_statement( line )
             except NotImplementedError as e:
-                pass
+                print e
 
         return data
 
