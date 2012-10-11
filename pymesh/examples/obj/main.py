@@ -15,12 +15,22 @@ def load( filename ):
 	obj.load( path )
 
 def main():
-	files = [
-		'cessna.obj',
-		'cornell_box.obj',
-		]
-	for filename in files:
-		load( filename )
+	# load all .obj files in our data directory
+	# get the path relative to our examples file
+	path = os.path.join(
+        os.path.dirname( __file__ ),
+        '../data/obj'
+        )
+	# get the directory contents
+	contents = os.listdir(path)
+
+	# iterate through the contents and load
+	# each file that is a .obj file
+	for filename in contents:
+		name, extension = os.path.splitext( filename )
+		
+		if extension.lower() == '.obj':
+			load( filename )
 
 if __name__ == '__main__':
 	main()
