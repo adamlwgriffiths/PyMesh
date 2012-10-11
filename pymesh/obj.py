@@ -922,7 +922,10 @@ class OBJ( object ):
                 continue
 
             # pass to our obj parser
-            data.parse_statement( line )
+            try:
+                data.parse_statement( line )
+            except NotImplementedError as e:
+                pass
 
         return data
 
