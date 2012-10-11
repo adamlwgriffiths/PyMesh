@@ -419,7 +419,7 @@ class OBJ_Data( object ):
         for malformed or unexpected data.
         """
         # get the statement type
-        values = statement.split( ' ' )
+        values = statement.split( None )
 
         type = values[ 0 ]
         if len(values) > 1:
@@ -438,8 +438,9 @@ class OBJ_Data( object ):
             print 'Unknown statement: %s' % statement
 
     def _parse_v( self, statement ):
-        type, values = statement.split( ' ', 1 )
-        values = values.split( ' ' )
+        type, values = statement.split( None, 1 )
+        values = values.split( None )
+        print values
         # convert to float and a list
         floats = map( float, values )
         # append to our vertices
@@ -447,8 +448,8 @@ class OBJ_Data( object ):
         self.vertices.append( floats )
 
     def _parse_vt( self, statement ):
-        type, values = statement.split( ' ', 1 )
-        values = values.split( ' ' )
+        type, values = statement.split( None, 1 )
+        values = values.split( None )
         # convert to float and a list
         floats = map( float, values )
         # append to our vertices
@@ -456,8 +457,8 @@ class OBJ_Data( object ):
         self.texture_coords.append( floats )
 
     def _parse_vn( self, statement ):
-        type, values = statement.split( ' ', 1 )
-        values = values.split( ' ' )
+        type, values = statement.split( None, 1 )
+        values = values.split( None )
         # convert to float and a list
         floats = map( float, values )
         # append to our vertices
@@ -465,8 +466,8 @@ class OBJ_Data( object ):
         self.normals.append( floats )
 
     def _parse_p( self, statement ):
-        type, values = statement.split( ' ', 1 )
-        values = values.split( ' ' )
+        type, values = statement.split( None, 1 )
+        values = values.split( None )
         # convert to integer and a list
         ints = map( int, values )
 
@@ -484,8 +485,8 @@ class OBJ_Data( object ):
         self._current_mesh[ 'points' ].append( abs_ints )
 
     def _parse_l( self, statement ):
-        type, values = statement.split( ' ', 1 )
-        values = values.split( ' ' )
+        type, values = statement.split( None, 1 )
+        values = values.split( None )
         # convert to integer and a list
         ints = map( int, values )
 
@@ -503,8 +504,8 @@ class OBJ_Data( object ):
         self._current_mesh[ 'lines' ].append( abs_ints )
 
     def _parse_f( self, statement ):
-        type, values = statement.split( ' ', 1 )
-        values = values.split( ' ' )
+        type, values = statement.split( None, 1 )
+        values = values.split( None )
         # convert to integer and a list
         ints = map( int, values )
 
@@ -523,7 +524,7 @@ class OBJ_Data( object ):
 
     def _parse_o( self, statement ):
         # there should only be 1 name value
-        type, value = statement.split( ' ' )
+        type, value = statement.split( None )
 
         # push the current mesh and begin a new one
         # don't copy the mesh if we haven't actually set
@@ -543,7 +544,7 @@ class OBJ_Data( object ):
     def _parse_g( self, statement ):
         # g can have 0 arguments
         # if 0 arguments are supplied, the group is 'default'
-        values = statement.split( ' ' )
+        values = statement.split( None )
         type = values[ 0 ]
 
         if len(values) > 1:
@@ -568,7 +569,7 @@ class OBJ_Data( object ):
 
     def _parse_s( self, statement ):
         # there should only be 1 smoothing group value
-        type, value = statement.split( ' ' )
+        type, value = statement.split( None )
 
         # push the current mesh and begin a new one
         # don't copy the mesh if we haven't actually set
@@ -588,15 +589,15 @@ class OBJ_Data( object ):
             self._current_mesh[ 'smoothing' ] = int(value)
 
     def _parse_maplib( self, statement ):
-        type, values = statement.split( ' ', 1 )
-        values = values.split( ' ' )
+        type, values = statement.split( None, 1 )
+        values = values.split( None )
 
         # store the specified texture maps in our list
         self.textures.update( values )
 
     def _parse_usemap( self, statement ):
         # there should only be 1 texture value
-        type, value = statement.split( ' ' )
+        type, value = statement.split( None )
 
         # push the current mesh and begin a new one
         # don't copy the mesh if we haven't actually set
@@ -611,15 +612,15 @@ class OBJ_Data( object ):
         self._current_mesh[ 'texture' ] = value
 
     def _parse_mtllib( self, statement ):
-        type, values = statement.split( ' ', 1 )
-        values = values.split( ' ' )
+        type, values = statement.split( None, 1 )
+        values = values.split( None )
 
         # store the specified material files
         self.materials.update( values )
 
     def _parse_usemtl( self, statement ):
         # there should only be 1 texture value
-        type, value = statement.split( ' ' )
+        type, value = statement.split( None )
 
         # push the current mesh and begin a new one
         # don't copy the mesh if we haven't actually set
@@ -640,14 +641,14 @@ class OBJ_Data( object ):
 
     def _parse_shadow_obj( self, statement ):
         # there should only be 1 shadow value
-        type, values = statement.split( ' ' )
+        type, values = statement.split( None )
 
         # set the name of the mesh
         self.shadow = values
 
     def _parse_trace_obj( self, statement ):
         # there should only be 1 shadow value
-        type, values = statement.split( ' ' )
+        type, values = statement.split( None )
 
         # set the name of the mesh
         self.trace = values
@@ -891,7 +892,7 @@ class OBJ( object ):
             # there are some statements with 0 parameters
             # such as  'g'
             # so we need to extract the specific values later
-            values = line.split( ' ' )
+            values = line.split( None )
 
             # get the first word
             # this is the statement type
