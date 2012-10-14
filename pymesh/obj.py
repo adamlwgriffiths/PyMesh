@@ -8,7 +8,6 @@ http://openglsamples.sourceforge.net/files/glut_obj.cpp
 """
 
 from string import Template
-from inspect import stack
 import Queue
 
 from pyglet.gl import *
@@ -123,6 +122,7 @@ class OBJ_Data( object ):
     Prefixing the command with a dash (-) ignores any errors.
 
 
+
     Supported Vertex data Statements:
     Vertices
     v x y z [w]
@@ -188,6 +188,8 @@ class OBJ_Data( object ):
     A negative value indicates an indice from the end of the currently
     specified list of vertices, texture coordinates or normals.
     Not the end of the final list.
+
+
 
     Unsupported Elements:
     curv u0 u1 v1 v2 ...
@@ -275,6 +277,7 @@ class OBJ_Data( object ):
     cdp v1 v2 v3 ... v16
     res useg vseg
     fo v1 v2 ... vn
+
 
 
     Unsupported Non-standard statements:
@@ -489,8 +492,8 @@ class OBJ_Data( object ):
         No index is indicated by the None value.
         """
         # iterate through each set of vertices and
-        # convert to a list of 3 values
-        # [ vertex, texture coord, normal ]
+        # convert to a tuple of 3 values
+        # () vertex, texture coord, normal )
         # this will be an absolute indice, or None
         # if no indice is provided
         # faces can have vertex, texture coord and normal
@@ -506,7 +509,7 @@ class OBJ_Data( object ):
             indices = map( self._convert_indice, indices )
 
             # append to mesh
-            result.append( indices )
+            result.append( tuple(indices) )
         return result
 
     def _parse_p( self, statement ):
@@ -521,7 +524,7 @@ class OBJ_Data( object ):
         indices = self._convert_indices( values )
 
         # append to mesh
-        self._current_mesh[ 'points' ].extend( indices )
+        self._current_mesh[ 'points' ].append( indices )
 
     def _parse_l( self, statement ):
         type, values = statement.split( None, 1 )
@@ -535,7 +538,7 @@ class OBJ_Data( object ):
         indices = self._convert_indices( values )
 
         # append to mesh
-        self._current_mesh[ 'lines' ].extend( indices )
+        self._current_mesh[ 'lines' ].append( indices )
 
     def _parse_f( self, statement ):
         type, values = statement.split( None, 1 )
@@ -549,7 +552,7 @@ class OBJ_Data( object ):
         indices = self._convert_indices( values )
 
         # append to mesh
-        self._current_mesh[ 'faces' ].extend( indices )
+        self._current_mesh[ 'faces' ].append( indices )
 
     def _parse_o( self, statement ):
         # there should only be 1 name value
