@@ -332,8 +332,9 @@ class OBJ_Data( object ):
         All meshes begin as part of the default group.
         Any group statement will over-ride this.
 
-        The default values are:
-        groups = [ 'default' ]
+        Points, lines and faces are a lists.
+        Each value in the list is a tuple that represents the indicies
+        for vertex, texture coordinate and normal data respectively.
         """
         return {
             'name':         None,
@@ -354,6 +355,9 @@ class OBJ_Data( object ):
         if not self._current_mesh:
             # if we don't have one, create one
             self._current_mesh = self._create_mesh()
+
+            # add it to the list of meshes
+            self.meshes.append( self._current_mesh )
 
     def _current_mesh_has_data( self ):
         """Checks if there is a current mesh and if
@@ -385,10 +389,11 @@ class OBJ_Data( object ):
         mesh.
         """
         if self._current_mesh:
+            # duplicate ourself
+            self._current_mesh = self._current_mesh.copy()
             # copy the current mesh and push it into
             # our meshes list
-            mesh = self._current_mesh.copy()
-            self.meshes.append( mesh )
+            self.meshes.append( self._current_mesh )
         else:
             # create an empty mesh
             self._current_mesh = _create_mesh
@@ -480,8 +485,17 @@ class OBJ_Data( object ):
             return None
         else:
             value = int(value)
-            if value < 0:
+            # obj uses 1 based indices
+            # so convert to 0 based
+            if value > 0:
+                value -= 1
+            # check for relative indices
+            # these are negative values
+            elif value < 0:
                 value = len( self.vertices ) + value
+            else:
+                # shouldn't be any 0 indices
+                assert False
             return value
 
     def _convert_indices( self, values ):
@@ -500,6 +514,7 @@ class OBJ_Data( object ):
         # it is invalid to mix vertex definitions
         # but we don't validate that here
         result = []
+
         for value in values:
             indices = value.split( '/' )
 
@@ -510,6 +525,7 @@ class OBJ_Data( object ):
 
             # append to mesh
             result.append( tuple(indices) )
+
         return result
 
     def _parse_p( self, statement ):
@@ -524,7 +540,7 @@ class OBJ_Data( object ):
         indices = self._convert_indices( values )
 
         # append to mesh
-        self._current_mesh[ 'points' ].append( indices )
+        self._current_mesh[ 'points' ].extend( indices )
 
     def _parse_l( self, statement ):
         type, values = statement.split( None, 1 )
@@ -538,7 +554,7 @@ class OBJ_Data( object ):
         indices = self._convert_indices( values )
 
         # append to mesh
-        self._current_mesh[ 'lines' ].append( indices )
+        self._current_mesh[ 'lines' ].append( tuple(indices) )
 
     def _parse_f( self, statement ):
         type, values = statement.split( None, 1 )
@@ -552,7 +568,7 @@ class OBJ_Data( object ):
         indices = self._convert_indices( values )
 
         # append to mesh
-        self._current_mesh[ 'faces' ].append( indices )
+        self._current_mesh[ 'faces' ].append( tuple(indices) )
 
     def _parse_o( self, statement ):
         # there should only be 1 name value
@@ -700,9 +716,8 @@ class OBJ_Data( object ):
             )
 
     def _parse_fo( self, statement ):
-        raise NotImplementedError(
-            '"%s" not supported' % statement.split( None, 1 )[ 0 ]
-            )
+        # redirect to 'f' as per documentation
+        self._parse_f( statement )
 
     def _parse_cstype( self, statement ):
         raise NotImplementedError(
@@ -1038,6 +1053,8 @@ class OBJ( object ):
                 data.parse_statement( line )
             except NotImplementedError as e:
                 print e
+
+        data._current_mesh = None
 
         return data
 
