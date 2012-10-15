@@ -449,8 +449,18 @@ class OBJ_Data( object ):
     def _parse_v( self, statement ):
         type, values = statement.split( None, 1 )
         values = values.split()
+
         # convert to float and a list
         floats = map( float, values )
+
+        # divide by W component if present
+        if len(floats) == 4:
+            div = 1.0 / floats[ 3 ]
+            floats[ 0 ] *= div
+            floats[ 1 ] *= div
+            floats[ 2 ] *= div
+            floats = floats[ :3 ]
+
         # append to our vertices
         # this will append a list inside our vertices list
         self.vertices.append( floats )
@@ -458,8 +468,10 @@ class OBJ_Data( object ):
     def _parse_vt( self, statement ):
         type, values = statement.split( None, 1 )
         values = values.split()
+
         # convert to float and a list
         floats = map( float, values )
+
         # append to our vertices
         # this will append a list inside our vertices list
         self.texture_coords.append( floats )
@@ -467,8 +479,18 @@ class OBJ_Data( object ):
     def _parse_vn( self, statement ):
         type, values = statement.split( None, 1 )
         values = values.split()
+
         # convert to float and a list
         floats = map( float, values )
+
+        # divide by W component if present
+        if len(floats) == 4:
+            div = 1.0 / floats[ 3 ]
+            floats[ 0 ] *= div
+            floats[ 1 ] *= div
+            floats[ 2 ] *= div
+            floats = floats[ :3 ]
+
         # append to our vertices
         # this will append a list inside our vertices list
         self.normals.append( floats )
