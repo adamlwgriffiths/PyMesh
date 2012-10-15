@@ -270,7 +270,7 @@ class MD2( object ):
         ( 135, 153, 10.0 ),   # CROUCH_STAND
         ( 154, 159,  7.0 ),   # CROUCH_WALK
         ( 160, 168, 10.0 ),   # CROUCH_ATTACK
-        ( 196, 172,  7.0 ),   # CROUCH_PAIN
+        ( 169, 172,  7.0 ),   # CROUCH_PAIN
         ( 173, 177,  5.0 ),   # CROUCH_DEATH
         ( 178, 183,  7.0 ),   # DEATH_FALLBACK
         ( 184, 189,  7.0 ),   # DEATH_FALLFORWARD
