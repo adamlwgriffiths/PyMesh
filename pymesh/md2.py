@@ -229,54 +229,30 @@ class MD2( object ):
 
     # List of frame types used by Quake 2
     # http://tfc.duke.free.fr/old/models/md2.htm
-    frame_names = [
-        'stand',
-        'run',
-        'attack',
-        'pain_a',
-        'pain_b',
-        'pain_c',
-        'jump',
-        'flip',
-        'salute',
-        'fallback',
-        'wave',
-        'point',
-        'crouch_stand',
-        'crouch_walk',
-        'crouch_attack',
-        'crouch_pain',
-        'crouch_death', 
-        'death_fallback',
-        'death_fallforward',
-        'death_fallbackslow',
-        'boom',
-        ]
-
-    frame_offsets = [
-        # start frame, end frame, fps
-        (   0,  39,  9.0 ),   # STAND
-        (  40,  45, 10.0 ),   # RUN
-        (  46,  53, 10.0 ),   # ATTACK
-        (  54,  57,  7.0 ),   # PAIN_A
-        (  58,  61,  7.0 ),   # PAIN_B
-        (  62,  65,  7.0 ),   # PAIN_C
-        (  66,  71,  7.0 ),   # JUMP
-        (  72,  83,  7.0 ),   # FLIP
-        (  84,  94,  7.0 ),   # SALUTE
-        (  95, 111, 10.0 ),   # FALLBACK
-        ( 112, 122,  7.0 ),   # WAVE
-        ( 123, 134,  6.0 ),   # POINT
-        ( 135, 153, 10.0 ),   # CROUCH_STAND
-        ( 154, 159,  7.0 ),   # CROUCH_WALK
-        ( 160, 168, 10.0 ),   # CROUCH_ATTACK
-        ( 169, 172,  7.0 ),   # CROUCH_PAIN
-        ( 173, 177,  5.0 ),   # CROUCH_DEATH
-        ( 178, 183,  7.0 ),   # DEATH_FALLBACK
-        ( 184, 189,  7.0 ),   # DEATH_FALLFORWARD
-        ( 190, 197,  7.0 ),   # DEATH_FALLBACKSLOW
-        ( 198, 198,  5.0 ),   # BOOM
-        ]
+    # beware: this page has a typo for the crouch_pain start frame
+    animations = {
+        'stand':                (0, 39, 9.0),
+        'run':                  (40, 45, 10.0),
+        'attack':               (46, 53, 10.0),
+        'pain_a':               (54, 57, 7.0),
+        'pain_b':               (58, 61, 7.0),
+        'pain_c':               (62, 65, 7.0),
+        'jump':                 (66, 71, 7.0),
+        'flip':                 (72, 83, 7.0),
+        'salute':               (84, 94, 7.0),
+        'fallback':             (95, 111, 10.0),
+        'wave':                 (112, 122, 7.0),
+        'point':                (123, 134, 6.0),
+        'crouch_stand':         (135, 153, 10.0),
+        'crouch_walk':          (154, 159, 7.0),
+        'crouch_attack':        (160, 168, 10.0),
+        'crouch_pain':          (169, 172, 7.0),
+        'crouch_death':         (173, 177, 5.0),
+        'death_fallback':       (178, 183, 7.0),
+        'death_fallforward':    (184, 189, 7.0),
+        'death_fallbackslow':   (190, 197, 7.0),
+        'boom':                 (198, 198, 5.0),
+        }
     
     def __init__( self ):
         super( MD2, self ).__init__()
