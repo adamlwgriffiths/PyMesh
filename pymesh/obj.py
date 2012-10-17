@@ -5,6 +5,17 @@ http://www.martinreddy.net/gfx/3d/OBJ.spec
 http://en.wikipedia.org/wiki/Wavefront_.obj_file
 http://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Load_OBJ
 http://openglsamples.sourceforge.net/files/glut_obj.cpp
+
+Future Work:
+Implement '.mtl' loader.
+
+Future optimisations:
+Merge groups with the same:
+name, groups, material, texture and smoothing group
+I attempted this by using a dictionary with the above values as a tuple for
+the key, but this slowed down loading massively.
+Ironically it didn't slow down loading in this file, but my conversion
+to OpenGL. No idea how.
 """
 
 from string import Template
@@ -340,12 +351,15 @@ class OBJ_Data( object ):
             'name':         None,
             'groups':       [ OBJ_Data.default_group ],
             'smoothing':    None,
+            'material':     None,
+            'texture':      None,
             'points':       [],
             'lines':        [],
             'faces':        [],
-            'material':     None,
-            'texture':      None,
             }
+
+    def _add_mesh_to_list( self, mesh ):
+        self.meshes.append( mesh )
 
     def _ensure_current_mesh( self ):
         """Ensures there is a current mesh.
@@ -357,7 +371,7 @@ class OBJ_Data( object ):
             self._current_mesh = self._create_mesh()
 
             # add it to the list of meshes
-            self.meshes.append( self._current_mesh )
+            self._add_mesh_to_list( self._current_mesh )
 
     def _current_mesh_has_data( self ):
         """Checks if there is a current mesh and if
@@ -377,7 +391,7 @@ class OBJ_Data( object ):
             len(self._current_mesh[ 'points' ]) > 0 or \
             len(self._current_mesh[ 'lines' ]) > 0 or \
             len(self._current_mesh[ 'faces' ]) > 0:
-                return True
+            return True
 
         # if we get this far, there is no data set
         return False
@@ -393,7 +407,7 @@ class OBJ_Data( object ):
             self._current_mesh = self._current_mesh.copy()
             # copy the current mesh and push it into
             # our meshes list
-            self.meshes.append( self._current_mesh )
+            self._add_mesh_to_list( self._current_mesh )
         else:
             # create an empty mesh
             self._current_mesh = _create_mesh
@@ -455,15 +469,12 @@ class OBJ_Data( object ):
 
         # divide by W component if present
         if len(floats) == 4:
-            div = 1.0 / floats[ 3 ]
-            floats[ 0 ] *= div
-            floats[ 1 ] *= div
-            floats[ 2 ] *= div
-            floats = floats[ :3 ]
+            w = 1.0 / floats[ 3 ]
+            floats = [ value * 3 for value in floats[ :3 ] ]
 
         # append to our vertices
         # this will append a list inside our vertices list
-        self.vertices.append( floats )
+        self.vertices.append( tuple(floats) )
 
     def _parse_vt( self, statement ):
         type, values = statement.split( None, 1 )
