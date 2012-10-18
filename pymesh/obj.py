@@ -18,6 +18,8 @@ Ironically it didn't slow down loading in this file, but my conversion
 to OpenGL. No idea how.
 """
 
+import os
+import re
 from string import Template
 import Queue
 
@@ -125,7 +127,216 @@ class ArgumentBufferStack( BufferStack ):
         self.args = dict_args
 
 
-class OBJ_Data( object ):
+class OBJ_Loader( object ):
+
+    def parse_statement( self, statement ):
+        """Processes the passed in statement.
+
+        This will call the appropriate member function
+        for the statement dynamically.
+        Member functions must be in the form:
+        _parse_%s( self, statement )
+        where %s is the statement type.
+        Eg.
+        _parse_vt( self, statement )
+        will parse texture coordinates.
+
+        If an appropriate member function is not found
+        nothing will be done and a statement will be
+        printed.
+
+        This method does not permit statements beginning with
+        invalid function characters to be passed through.
+        This includes comments (#).
+
+        Comments and empty lines should not be passed to this
+        function.
+        'call' statements should also be handled outside
+        this function.
+
+        Can throw NotImplementedError for unimplemented features,
+        AssertError for programmatical errors and other exceptions
+        for malformed or unexpected data.
+        """
+        # get the statement type
+        values = statement.split()
+
+        type = values[ 0 ]
+        if len(values) > 1:
+            values = values[ 1: ]
+        else:
+            # no values, so empty our arg list
+            values = []
+
+        # check if we have a function that handles this type of value
+        # all parse functions are named _parse_$ where $ is
+        # the statement type
+        func = getattr( self, '_parse_%s' % type, None )
+        if func != None:
+            func( statement )
+        else:
+            print 'Unknown statement: %s' % statement
+
+    def process_filename_list( self, values ):
+        # filenames are normally split by whitespace
+        # but the specification also allows for files with spaces in them
+        # so we need to see if a value doesn't end with an extension
+        # if not, concatenate it with the next value
+        return re.split( '\W+\.\W+', values )
+
+class OBJ_Material( OBJ_Loader ):
+    """
+    Supported material statements:
+
+    newmtl name
+    Begins a new material
+
+    Ka r g b
+    Defines the ambient color of the material to be (r,g,b).
+    The default is (0.2,0.2,0.2);
+
+    Kd r g b
+    Defines the diffuse color of the material to be (r,g,b).
+    The default is (0.8,0.8,0.8);
+
+    Ks r g b
+    Defines the specular color of the material to be (r,g,b).
+    This color shows up in highlights.
+    The default is (1.0,1.0,1.0);
+
+    d alpha
+    Defines the transparency of the material to be alpha.
+    The default is 1.0 (not transparent at all)
+    Some formats use Tr instead of d;
+
+    Tr alpha
+    Remaps to 'd'.
+
+    Ns s
+    Defines the shininess of the material to be s. The default is 0.0;
+
+    illum n
+    Denotes the illumination model used by the material.
+    Valid values are:
+    - 1: indicates a flat material with no specular highlights,
+        so the value of Ks is not used.
+    - 2: denotes the presence of specular highlights,
+        so a specification for Ks is required.
+
+    map_Ka filename
+    names a file containing a texture map,
+    which should just be an ASCII dump of RGB values;
+    """
+    
+    def __init__( self ):
+        super( OBJ_Material, self ).__init__()
+
+        self.materials = {}
+        self.textures = set([])
+
+        self._current_material = None
+
+    def _create_material( self ):
+        """Creates an empty mesh with default values.
+
+        All meshes begin as part of the default group.
+        Any group statement will over-ride this.
+
+        Points, lines and faces are a lists.
+        Each value in the list is a tuple that represents the indicies
+        for vertex, texture coordinate and normal data respectively.
+        """
+        return {
+            'name':         None,
+            'ambient':      [ 0.2, 0.2, 0.2 ],
+            'diffuse':      [ 0.8, 0.8, 0.8 ],
+            'specular':     [ 1.0, 1.0, 1.0 ],
+            'alpha':        1.0,
+            'shine':        0.0,
+            'illum':        1,
+            'texture':      None,
+            }
+
+    def _parse_newmtl( self, statement ):
+        # there should only be 1 name value
+        # but the value can have a space in it
+        type, value = statement.split( None, 1 )
+
+        # create a new material
+        # and set it as the current one
+        # if we don't have one, create one
+        self._current_material = self._create_material()
+
+        # add it to the list of meshes
+        self._current_material['name'] = value
+
+        # add it to the list of meshes
+        self.materials[ value ] = self._current_material
+
+    def _parse_Ka( self, statement ):
+        type, values = statement.split( None, 1 )
+        red, green, blue = values.split()
+        
+        self._current_material['ambient'] = [
+            float(red),
+            float(green),
+            float(blue)
+            ]
+
+    def _parse_Kd( self, statement ):
+        type, values = statement.split( None, 1 )
+        red, green, blue = values.split()
+        
+        self._current_material['diffuse'] = [
+            float(red),
+            float(green),
+            float(blue)
+            ]
+
+    def _parse_Ks( self, statement ):
+        type, values = statement.split( None, 1 )
+        red, green, blue = values.split()
+        
+        self._current_material['specular'] = [
+            float(red),
+            float(green),
+            float(blue)
+            ]
+
+    def _parse_Tr( self, statement ):
+        # there should only be 1 name value
+        type, value = statement.split()
+
+        self._current_material['alpha'] = float(value)
+
+    def _parse_d( self, statement ):
+        # redirect to Tr
+        return self._parse_Tr( statement )
+
+    def _parse_Ns( self, statement ):
+        # there should only be 1 name value
+        type, value = statement.split()
+
+        self._current_material['shine'] = float(value)
+
+    def _parse_illum( self, statement ):
+        # there should only be 1 name value
+        type, value = statement.split()
+
+        self._current_material['illum'] = int(value)
+
+    def _parse_map_Ka( self, statement ):
+        # there should only be 1 name value
+        type, value = statement.split()
+
+        self._current_material['texture'] = value
+
+        # add to our global texture set
+        self.textures.add( value )
+
+
+
+class OBJ_Mesh( OBJ_Loader ):
     """
     Unsupported General Statements:
     csh [-]command
@@ -322,7 +533,7 @@ class OBJ_Data( object ):
 
 
     def __init__( self ):
-        super( OBJ_Data, self ).__init__()
+        super( OBJ_Mesh, self ).__init__()
 
         self.vertices = []
         self.texture_coords = []
@@ -349,7 +560,7 @@ class OBJ_Data( object ):
         """
         return {
             'name':         None,
-            'groups':       [ OBJ_Data.default_group ],
+            'groups':       [ OBJ_Mesh.default_group ],
             'smoothing':    None,
             'material':     None,
             'texture':      None,
@@ -411,54 +622,6 @@ class OBJ_Data( object ):
         else:
             # create an empty mesh
             self._current_mesh = _create_mesh
-
-    def parse_statement( self, statement ):
-        """Processes the passed in statement.
-
-        This will call the appropriate member function
-        for the statement dynamically.
-        Member functions must be in the form:
-        _parse_%s( self, statement )
-        where %s is the statement type.
-        Eg.
-        _parse_vt( self, statement )
-        will parse texture coordinates.
-
-        If an appropriate member function is not found
-        nothing will be done and a statement will be
-        printed.
-
-        This method does not permit statements beginning with
-        invalid function characters to be passed through.
-        This includes comments (#).
-
-        Comments and empty lines should not be passed to this
-        function.
-        'call' statements should also be handled outside
-        this function.
-
-        Can throw NotImplementedError for unimplemented features,
-        AssertError for programmatical errors and other exceptions
-        for malformed or unexpected data.
-        """
-        # get the statement type
-        values = statement.split()
-
-        type = values[ 0 ]
-        if len(values) > 1:
-            values = values[ 1: ]
-        else:
-            # no values, so empty our arg list
-            values = []
-
-        # check if we have a function that handles this type of value
-        # all parse functions are named _parse_$ where $ is
-        # the statement type
-        func = getattr( self, '_parse_%s' % type, None )
-        if func != None:
-            func( statement )
-        else:
-            print 'Unknown statement: %s' % statement
 
     def _parse_v( self, statement ):
         type, values = statement.split( None, 1 )
@@ -631,7 +794,7 @@ class OBJ_Data( object ):
         if len(values) > 1:
             values = values[ 1: ]
         else:
-            values = [ OBJ_Data.default_group ]
+            values = [ OBJ_Mesh.default_group ]
 
         # push the current mesh and begin a new one
         # don't copy the mesh if we haven't actually set
@@ -671,10 +834,12 @@ class OBJ_Data( object ):
 
     def _parse_maplib( self, statement ):
         type, values = statement.split( None, 1 )
-        values = values.split()
+
+        # process the filenames
+        filenames = self.process_filename_list( values )
 
         # store the specified texture maps in our list
-        self.textures.update( values )
+        self.textures.update( filenames )
 
     def _parse_usemap( self, statement ):
         # there should only be 1 texture value
@@ -696,10 +861,12 @@ class OBJ_Data( object ):
 
     def _parse_mtllib( self, statement ):
         type, values = statement.split( None, 1 )
-        values = values.split()
+
+        # process the filenames
+        filenames = self.process_filename_list( values )
 
         # store the specified material files
-        self.materials.update( values )
+        self.materials.update( filenames )
 
     def _parse_usemtl( self, statement ):
         # there should only be 1 texture value
@@ -907,6 +1074,59 @@ class OBJ_Data( object ):
             '"%s" not supported' % statement.split( None, 1 )[ 0 ]
             )
 
+def process_obj_buffer( buffer ):
+    """Generator that processes a buffer and returns
+    complete OBJ statements.
+
+    Empty lines will be ignored.
+    Comments will be ignored.
+    Multi-line statements will be concatenated to a single line.
+    Start and end whitespace will be stripped.
+    """
+
+    def obj_line( buffer ):
+        """Generator that returns valid OBJ statements.
+
+        Removes comments, whitespace and concatenates multi-line
+        statements.
+        """
+        while True:
+            line = buffer.readline()
+
+            # check if we've hit the end
+            # EOF is signified by ''
+            # whereas an empty line is '\n'
+            if line == '':
+                break
+
+            # remove any whitespace
+            line = line.strip()
+
+            if line.startswith( '#' ):
+                continue
+
+            if len( line ) <= 0:
+                continue
+
+            yield line
+
+    # use our generator to remove comments and empty lines
+    gen = obj_line( buffer )
+
+    # iterate through each valid line of the OBJ file
+    # and yield full statements
+    for line in gen:
+        # concatenate lines until we get a full statement
+        while line.endswith( '\\' ):
+            try:
+                # remove the \ token
+                # add some white space
+                line = line[:-1].strip() + ' ' + gen.next()
+            except:
+                raise EOFError( 'Line had a continuation but no following line to concatenate with' )
+
+        yield line
+
 
 class OBJ( object ):
     """
@@ -933,7 +1153,7 @@ class OBJ( object ):
     Arguments are replaced like in a unix file.
     $1 is replaced by arg1, $2 by arg2 and so on.
 
-    For other supported and unsupported statements, see OBJ_Data.
+    For other supported and unsupported statements, see OBJ_Mesh.
     """
     
     def __init__( self ):
@@ -944,7 +1164,7 @@ class OBJ( object ):
         self.trace = None
         self.textures = []
         self.materials = []
-    
+
     def load( self, filename ):
         """
         Reads the OBJ data from the existing
@@ -953,88 +1173,51 @@ class OBJ( object ):
         @param filename: the filename of the OBJ file
         to load.
         """
-        with open( filename, 'r' ) as f:
-            self.load_from_buffer( f )
 
-    def load_from_buffer( self, stream ):
-        # process the main model
-        self.model = self._parse_obj_buffer( stream )
+        # extract the path of the original filename
+        path = os.path.dirname( filename )
+
+        with open( filename, 'r' ) as f:
+            print path
+            # process the main model
+            self.model = self._parse_obj_mesh( f, path )
 
         # process any shadow objects
         self.shadow = None
         if self.model.shadow:
-            with open( model.shadow, 'r' ) as f:
-                self.shadow = self._parse_obj_buffer( f )
+            # convert any further filenames to be relative to the file
+            shadow = os.path.join( path, self.model.shadow )
+
+            print shadow
+
+            with open( shadow, 'r' ) as f:
+                self.shadow = self._parse_obj_mesh( f, path )
 
         # process any trace objects
         self.trace = None
         if self.model.trace:
-            with open( model.trace, 'r' ) as f:
-                self.trace = self._parse_obj_buffer( f )
+            # convert any further filenames to be relative to the file
+            trace = os.path.join( path, self.model.trace )
+
+            print trace
+
+            with open( trace, 'r' ) as f:
+                self.trace = self._parse_obj_mesh( f, path )
 
         # process any materials
-        # TODO:
+        for material in self.model.materials:
+            # convert any further filenames to be relative to the file
+            material = os.path.join( path, material )
 
-        # process any textures
-        # TODO:
+            print material
 
-    def _parse_obj_buffer( self, buffer ):
-        def obj_statement( buffer ):
-            """Generator that processes a buffer and returns
-            complete OBJ statements.
+            with open( material, 'r' ) as f:
+                self._parse_obj_material( f )
 
-            Empty lines will be ignored.
-            Comments will be ignored.
-            Multi-line statements will be concatenated to a single line.
-            Start and end whitespace will be stripped.
-            """
-
-            def obj_line( buffer ):
-                """Generator that returns valid OBJ statements.
-
-                Removes comments, whitespace and concatenates multi-line
-                statements.
-                """
-                while True:
-                    line = buffer.readline()
-
-                    # remove any whitespace
-                    line = line.strip()
-
-                    if line.startswith( '#' ):
-                        continue
-
-                    if len( line ) <= 0:
-                        continue
-
-                    # check if we've hit the end
-                    # EOF is signified by ''
-                    # whereas an empty line is '\n'
-                    if line == '':
-                        break
-
-                    yield line
-
-            # use our generator to remove comments and empty lines
-            gen = obj_line( buffer )
-
-            # iterate through each valid line of the OBJ file
-            # and yield full statements
-            for line in gen:
-                # concatenate lines until we get a full statement
-                while line.endswith( '\\' ):
-                    try:
-                        # remove the \ token
-                        # add some white space
-                        line = line[:-1].strip() + ' ' + gen.next()
-                    except:
-                        raise EOFError( 'Line had a continuation but no following line to concatenate with' )
-
-                yield line
-
+    def _parse_obj_mesh( self, buffer, path ):
         # we will store our values as a property of this method
         # this lets the inner functions access them
-        data = OBJ_Data()
+        data = OBJ_Mesh()
 
         buffers = ArgumentBufferStack()
         buffers.push( buffer )
@@ -1044,7 +1227,7 @@ class OBJ( object ):
         # this will construct full statements from our data
         # and concatenate any multiple line statements into
         # complete statements
-        statements = obj_statement( buffers )
+        statements = process_obj_buffer( buffers )
 
         # process the file
         for line in statements:
@@ -1073,6 +1256,9 @@ class OBJ( object ):
                 if len(values) > 1:
                     args = values[ 1: ]
 
+                # make filename relative to original
+                filename = os.path.join( path, filename )
+
                 # open it as a file and push into our read buffer
                 f = open( filename, 'r' )
                 statements.push( f )
@@ -1087,7 +1273,33 @@ class OBJ( object ):
             except NotImplementedError as e:
                 print e
 
+        # zero the current mesh
         data._current_mesh = None
+
+        return data
+
+    def _parse_obj_material( self, buffer ):
+        # we will store our values as a property of this method
+        # this lets the inner functions access them
+        data = OBJ_Material()
+
+        # pass the buffer stack to our statement parser
+        # this will construct full statements from our data
+        # and concatenate any multiple line statements into
+        # complete statements
+        statements = process_obj_buffer( buffer )
+
+        # process the file
+        for line in statements:
+            # pass to our obj parser
+            try:
+                print line
+                data.parse_statement( line )
+            except NotImplementedError as e:
+                print e
+
+        # zero the current mesh
+        data._current_material = None
 
         return data
 
