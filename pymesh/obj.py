@@ -1178,7 +1178,6 @@ class OBJ( object ):
         path = os.path.dirname( filename )
 
         with open( filename, 'r' ) as f:
-            print path
             # process the main model
             self.model = self._parse_obj_mesh( f, path )
 
@@ -1187,8 +1186,6 @@ class OBJ( object ):
         if self.model.shadow:
             # convert any further filenames to be relative to the file
             shadow = os.path.join( path, self.model.shadow )
-
-            print shadow
 
             with open( shadow, 'r' ) as f:
                 self.shadow = self._parse_obj_mesh( f, path )
@@ -1199,8 +1196,6 @@ class OBJ( object ):
             # convert any further filenames to be relative to the file
             trace = os.path.join( path, self.model.trace )
 
-            print trace
-
             with open( trace, 'r' ) as f:
                 self.trace = self._parse_obj_mesh( f, path )
 
@@ -1208,8 +1203,6 @@ class OBJ( object ):
         for material in self.model.materials:
             # convert any further filenames to be relative to the file
             material = os.path.join( path, material )
-
-            print material
 
             with open( material, 'r' ) as f:
                 self._parse_obj_material( f )
@@ -1293,7 +1286,6 @@ class OBJ( object ):
         for line in statements:
             # pass to our obj parser
             try:
-                print line
                 data.parse_statement( line )
             except NotImplementedError as e:
                 print e
