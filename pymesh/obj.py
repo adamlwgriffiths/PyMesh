@@ -178,7 +178,9 @@ class OBJ_Loader( object ):
         if func != None:
             func( statement )
         else:
-            print 'Unknown statement: %s' % statement
+            raise NotImplementedError(
+                'Command "%s" is unknown' % type
+                )
 
     def process_filename_list( self, values ):
         # filenames are normally split by whitespace
