@@ -187,7 +187,8 @@ class OBJ_Loader( object ):
         # but the specification also allows for files with spaces in them
         # so we need to see if a value doesn't end with an extension
         # if not, concatenate it with the next value
-        return re.split( '\W+\.\W+', values )
+        return re.split( r'\W+\.\W+', values )
+
 
 class OBJ_Material( OBJ_Loader ):
     """
