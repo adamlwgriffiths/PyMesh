@@ -176,7 +176,7 @@ class MD5_Mesh( MD5 ):
             'numtris',
             'tris',
             'numweights',
-            'weights',
+            'weights'
             ]
         )
 
@@ -438,6 +438,15 @@ class MD5_Mesh( MD5 ):
             for num in range( num_weights )
             ]
 
+        return MD5_Mesh.mesh_layout(
+            shader,
+            num_verts,
+            verts,
+            num_tris,
+            tris,
+            num_weights,
+            weights
+            )
 
 
 class MD5_Anim( MD5 ):
