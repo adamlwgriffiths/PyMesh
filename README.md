@@ -23,7 +23,7 @@ Features
 --------
 
    * MD2 (.md2).
-   * MD5 (.md5mesh, .md5mesh).
+   * MD5 (.md5mesh, .md5anim).
    * Wavefront OBJ (.obj).
 
 Dependencies
