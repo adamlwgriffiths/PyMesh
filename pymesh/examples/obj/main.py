@@ -4,15 +4,9 @@ from pymesh.obj import OBJ
 
 def load( filename ):
     print 'Loading', filename
-    # get our current directory
-    path = os.path.join(
-        os.path.dirname( __file__ ),
-        '../data/obj',
-        filename
-        )
 
     obj = OBJ()
-    obj.load( path )
+    obj.load( filename )
 
 def main():
     # load all .obj files in our data directory
@@ -29,8 +23,15 @@ def main():
     for filename in contents:
         name, extension = os.path.splitext( filename )
 
+        # reattach our current directory
+        path = os.path.join(
+            os.path.dirname( __file__ ),
+            '../data/obj',
+            filename
+            )
+
         if extension.lower() == '.obj':
-            load( filename )
+            load( path )
 
 if __name__ == '__main__':
     main()
