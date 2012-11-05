@@ -22,8 +22,9 @@ Because PyMesh doesn't do any 3D graphics, it is platform and library independen
 Features
 --------
 
-   * MD2.
-   * Wavefront OBJ.
+   * MD2 (.md2).
+   * MD5 (.md5mesh, .md5mesh).
+   * Wavefront OBJ (.obj).
 
 Dependencies
 ------------
