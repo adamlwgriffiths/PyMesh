@@ -708,8 +708,14 @@ class MD5_Anim( MD5 ):
         Returns a tuple that contains a vertex and a quaternion.
         The vertex is a 3 value tuple.
         The quaternion is a 4 tuple value
+        Be aware, that ANY of these values can be None.
+        Once a single None value is found, all proceeding values
+        will be None.
+        A None value indicates that it should be inherited from
+        the baseframe values.
         For example:
         ( (0.0, 0.0, 0.0), (1.0, 1.0, 1.0, 1.0) )
+        ( (0.0, 0.0, None), (None, None, None, None) )
         """
 
         def process_bone( buffer ):
