@@ -10,6 +10,9 @@ from collections import namedtuple, OrderedDict
 
 import numpy
 
+import pyrr.vector
+import pyrr.quaternion
+
 import utils
 
 
@@ -172,11 +175,21 @@ class MD5_Mesh( MD5 ):
         [
             'shader',
             'numverts',
+            # a list of vert_layout namedtules
             'verts',
             'numtris',
+            # a list of 3 value lists, each sublist represents a triangle
+            # and each value a vertex index
             'tris',
             'numweights',
-            'weights'
+            # a list of weight_layout namedtuples
+            'weights',
+            # the following values are calculated after loading
+            # the raw MD5 data
+            # a list of lists, each sublist contains a vertex
+            'position',
+            # a list of lists, each sublist contains a normal
+            'normals'
             ]
         )
 
@@ -292,7 +305,7 @@ class MD5_Mesh( MD5 ):
         Returns a joint_layout named tuple.
         Parent is the parentIndex value.
         Position is in the format [x, y, z].
-        Quaternion is in the format [x, y, z, w].
+        Quaternion is in the format [w, x, y, z].
         """
 
         def process_joint( buffer ):
@@ -323,7 +336,7 @@ class MD5_Mesh( MD5 ):
                 name,
                 index,
                 (pos_x, pos_y, pos_z),
-                (quat_x, quat_y, quat_z, quat_w)
+                (quat_w, quat_x, quat_y, quat_z)
                 )
 
         # find the 'joints {' line
@@ -393,6 +406,90 @@ class MD5_Mesh( MD5 ):
                 ( pos_x, pos_y, pos_z )
                 )
 
+        def generate_positions( vertex, weights, joints ):
+            """
+            C++ pseudo-code
+            for ( int j = 0; j < vert.m_WeightCount; ++j )
+            {
+                Weight& weight = mesh.m_Weights[vert.m_StartWeight + j];
+                Joint& joint = m_Joints[weight.m_JointID];
+     
+                // Convert the weight position from Joint local space to object space
+                glm::vec3 rotPos = joint.m_Orient * weight.m_Pos;
+     
+                vert.m_Pos += ( joint.m_Pos + rotPos ) * weight.m_Bias;
+            }
+            """
+            def process_weight( weight, joint ):
+                """Takes the specified weight and joint
+                and returns a vector for that joint.
+                
+                The vector is multiplied by the weight (bias).
+                """
+                rotated_vector = pyrr.quaternion.apply_to_vector(
+                    joint.orientation,
+                    weight.position
+                    )
+
+                joint_pos = numpy.array( joint.position )
+                return (joint_pos + rotated_vector) * weight.weight
+
+            # for each weight and joint (they are linked) that affects
+            # the vertex, extract them and pass to our process function
+            positions = numpy.array([
+                process_weight(
+                    weights[ vertex.weight_index + index ],
+                    joints[ weights[ vertex.weight_index + index ].joint ]
+                    )
+                for index in range( vertex.weights_elements )
+                ])
+
+            # take all of the weighted values and sum them
+            position = list(
+                numpy.sum(
+                    positions,
+                    axis = 0,
+                    dtype = 'float32'
+                    )
+                )
+
+            return position
+
+        def generate_normals( verts, tris ):
+            #print verts
+            np_verts = numpy.array( verts, dtype = 'float32' )
+
+            # pull our the vertices
+            # this will generate a list of vertex triples
+            v = np_verts[ tris, : ]
+
+            # we will normalise the result afterward in a single pass
+            # for each triple, pull our the 0, 1 and 2 vertex
+            # as their own list
+            n = pyrr.vector.generate_normals(
+                v[ :, 0, : ],
+                v[ :, 1, : ],
+                v[ :, 2, : ],
+                normalise_result = False
+                )
+
+            # add our normals to the array
+            normals = numpy.zeros( np_verts.shape, dtype = 'float32' )
+            # the following line doesn't work due to numpy
+            # but it's basically what we're doing
+            #normals[ tris, : ] += n
+            for tri, normal in zip(tris, n):
+                normals[ tri[ 0 ] ] += normal
+                normals[ tri[ 1 ] ] += normal
+                normals[ tri[ 2 ] ] += normal
+
+            # normalise our normal vectors
+            # this will result in the average normal
+            # being stored
+            pyrr.vector.normalise( normals )
+
+            return list(normals)
+
 
         shader = None
         num_verts = None
@@ -438,6 +535,18 @@ class MD5_Mesh( MD5 ):
             for num in range( num_weights )
             ]
 
+        # generate our vertex positions
+        positions = [
+            generate_positions( vert, weights, self.joints )
+            for vert in verts
+            ]
+
+        # use the positions to generate normal data
+        normals = generate_normals(
+            positions,
+            tris
+            )
+
         return MD5_Mesh.mesh_layout(
             shader,
             num_verts,
@@ -445,7 +554,9 @@ class MD5_Mesh( MD5 ):
             num_tris,
             tris,
             num_weights,
-            weights
+            weights,
+            positions,
+            normals
             )
 
 
@@ -685,7 +796,7 @@ class MD5_Anim( MD5 ):
 
             return (
                 (pos_x, pos_y, pos_z),
-                (quat_x, quat_y, quat_z, quat_w)
+                (quat_w, quat_x, quat_y, quat_z)
                 )
 
         # find the 'baseframe {' line
@@ -754,7 +865,7 @@ class MD5_Anim( MD5 ):
 
             return (
                 (pos_x, pos_y, pos_z),
-                (quat_x, quat_y, quat_z, quat_w)
+                (quat_w, quat_x, quat_y, quat_z)
                 )
 
         # find the 'hierarchy {' line
