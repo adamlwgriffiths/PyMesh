@@ -33,6 +33,7 @@ PyMesh requires the following software:
 
    * Python 2
    * Numpy
+   * Pyrr (https://github.com/adamlwgriffiths/Pyrr)
 
 Source Installation
 -------------------
