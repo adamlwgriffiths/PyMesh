@@ -257,7 +257,11 @@ class MD2( object ):
     def __init__( self ):
         super( MD2, self ).__init__()
 
-        self.frames = []
+        self.header = None
+        self.skins = None
+        self.triangles = None
+        self.tcs = None
+        self.frames = None
 
     def load( self, filename ):
         """
@@ -282,20 +286,42 @@ class MD2( object ):
         # read all the data from the file
         self.header = self.read_header( f )
         self.skins = self.read_skins( f, self.header )
-        raw_tcs = self.read_texture_coordinates( f, self.header )
+        self.tcs = self.read_texture_coordinates( f, self.header )
         self.triangles = self.read_triangles( f, self.header )
-        raw_frames = self.read_frames( f, self.header )
+        self.frames = self.read_frames( f, self.header )
+
+    def prepare_mesh( self ):
+        def convert_indices_for_frame( frame, triangles ):
+            """
+            Creates a vertex list ready for rendering from
+            the loaded data.
+
+            Takes the frame's vertices and normals and
+            converts them to a vertex list using the
+            extracted triangle indices.
+
+            @param frame: the frame to convert.
+            @param triangles: the triangle data containing the
+            indices.
+            @return: returns a frame_layout named tuple with
+            the converted data.
+            """
+            return MD2.frame_layout(
+                frame.name,
+                frame.vertices[ triangles.vertex_indices ],
+                frame.normals[ triangles.vertex_indices ]
+                )
 
         # convert our tcs to their actual values
-        self.tcs = raw_tcs[ self.triangles.tc_indices ]
+        self.tcs = self.tcs[ self.triangles.tc_indices ]
 
         # we don't store the raw frame data, instead we'll make
         # rendering faster and convert the frame indices to
         # actual vertices in the index order
-        self.frames = self.convert_indicies_for_all_frames(
-            raw_frames,
-            self.triangles
-            )
+        self.frames = [
+            MD2.convert_indices_for_frame( self.frame, self.triangles )
+            for frame in frames
+            ]
 
     @staticmethod
     def _load_block( stream, format, count ):
@@ -427,7 +453,8 @@ class MD2( object ):
         @param header: the loaded MD2 header.
         @return: Returns an MD2 named tuple.
         The vertex and texture coordinate indices are
-        arrays of Nx3 dimensions where N is header.num_tris.
+        arrays of Nx3 dimensions for vertices and Nx2 for
+        texture coordinates where N is header.num_tris.
         """
         # seek to the triangles offset
         f.seek( header.offset_tris, os.SEEK_SET )
@@ -452,8 +479,9 @@ class MD2( object ):
         vertex_indices = vertex_indices.flatten()
         tc_indices = tc_indices.flatten()
 
-        triangles = MD2.triangle_layout._make(
-            [ vertex_indices, tc_indices ]
+        triangles = MD2.triangle_layout(
+            vertex_indices,
+            tc_indices
             )
 
         return triangles
@@ -540,47 +568,113 @@ class MD2( object ):
         normals = MD2.normal_lookup_table[ normal_indices ]
         normals.shape = (-1, 3)
 
-        return MD2.frame_layout._make(
-            [ name, vertices, normals ]
+        return MD2.frame_layout(
+            name,
+            vertices,
+            normals
             )
 
     @staticmethod
-    def convert_indicies_for_all_frames( frames, triangles ):
+    def process_vertices( md2 ):
+        """Processes MD2 data to generate a single set
+        of indices.
+
+        MD2 is an older format that has 2 sets of indices.
+        Vertex/Normal indices (md2.triangles.vertex_indices)
+        and Texture Coordinate indices (md2.triangles.tc_indices).
+
+        The problem is that modern 3D APIs don't like this.
+        OpenGL only allows a single set of indices.
+
+        We can either, extract the vertices, normals and
+        texture coordinates using the indices.
+        This will create a lot of data.
+
+        This function provides an alternative.
+        We iterate through the indices and determine if an index
+        has a unique vertex/normal and texture coordinate value.
+        If so, the index remains and the texture coordinate is moved
+        into the vertex index location in the texture coordinate array.
+
+        If not, a new vertex/normal/texture coordinate value is created
+        and the index is updated.
+
+        This function returns a tuple containing the following values.
+        (
+            [ new indices ],
+            [ new texture coordinate array ],
+            [ frame_layout( name, vertices, normals ) ]
+            )
         """
-        Creates vertex lists for all frames.
-
-        This function essentially calls
-        'convert_indices_for_frame' for all frames.
-
-        @param frames: the list of frames.
-        @param triangles: the list of triangles.
-        @return: returns a python list containing
-        frame_layout named tuples.
-        The list will be header.num_frames in length.
-        """
-        return [ MD2.convert_indices_for_frame( frame, triangles ) for frame in frames ]
-
-    @staticmethod
-    def convert_indices_for_frame( frame, triangles ):
-        """
-        Creates a vertex list ready for rendering from
-        the loaded data.
-
-        Takes the frame's vertices and normals and
-        converts them to a vertex list using the
-        extracted triangle indices.
-
-        @param frame: the frame to convert.
-        @param triangles: the triangle data containing the
-        indices.
-        @return: returns a frame_layout named tuple with
-        the converted data.
-        """
-        return MD2.frame_layout._make(
-            [
+        # convert our vertex / tc indices to a single indice
+        # we iterate through our list and 
+        indices = []
+        frames = [
+            (
                 frame.name,
-                frame.vertices[ triangles.vertex_indices ],
-                frame.normals[ triangles.vertex_indices ]
-                ]
+                list(frame.vertices),
+                list(frame.normals)
+                )
+            for frame in md2.frames
+            ]
+
+        # set the size of our texture coordinate list to the
+        # same size as one of our frame's vertex lists
+        tcs = list( [[None, None]] * len(frames[ 0 ][ 1 ]) )
+
+        for v_index, tc_index in zip(
+            md2.triangles.vertex_indices,
+            md2.triangles.tc_indices,
+            ):
+
+            indice = v_index
+
+            if \
+                tcs[ v_index ][ 0 ] == None and \
+                tcs[ v_index ][ 1 ] == None:
+                # no tc set yet
+                # set ours
+                tcs[ v_index ][ 0 ] = md2.tcs[ tc_index ][ 0 ]
+                tcs[ v_index ][ 1 ] = md2.tcs[ tc_index ][ 1 ]
+
+            elif \
+                tcs[ v_index ][ 0 ] != md2.tcs[ tc_index ][ 0 ] and \
+                tcs[ v_index ][ 1 ] != md2.tcs[ tc_index ][ 1 ]:
+
+                # a tc has been set and it's not ours
+                # create a new indice
+                indice = len( tcs )
+
+                # add a new unique vertice
+                for frame in frames:
+                    # vertex data
+                    frame[ 1 ].append( frame[ 1 ][ v_index ] )
+                    # normal data
+                    frame[ 2 ].append( frame[ 2 ][ v_index ] )
+                # texture coordinate
+                tcs.append(
+                    [
+                        md2.tcs[ tc_index ][ 0 ],
+                        md2.tcs[ tc_index ][ 1 ]
+                        ]
+                    )
+
+            # store the index
+            indices.append( indice )
+
+        # convert our frames to frame tuples
+        frame_tuples = [
+            MD2.frame_layout(
+                frame[ 0 ],
+                numpy.array( frame[ 1 ], dtype = numpy.float ),
+                numpy.array( frame[ 2 ], dtype = numpy.float )
+                )
+            for frame in frames
+            ]
+
+        return (
+            numpy.array( indices ),
+            numpy.array( tcs ),
+            frame_tuples
             )
 
