@@ -290,39 +290,6 @@ class MD2( object ):
         self.triangles = self.read_triangles( f, self.header )
         self.frames = self.read_frames( f, self.header )
 
-    def prepare_mesh( self ):
-        def convert_indices_for_frame( frame, triangles ):
-            """
-            Creates a vertex list ready for rendering from
-            the loaded data.
-
-            Takes the frame's vertices and normals and
-            converts them to a vertex list using the
-            extracted triangle indices.
-
-            @param frame: the frame to convert.
-            @param triangles: the triangle data containing the
-            indices.
-            @return: returns a frame_layout named tuple with
-            the converted data.
-            """
-            return MD2.frame_layout(
-                frame.name,
-                frame.vertices[ triangles.vertex_indices ],
-                frame.normals[ triangles.vertex_indices ]
-                )
-
-        # convert our tcs to their actual values
-        self.tcs = self.tcs[ self.triangles.tc_indices ]
-
-        # we don't store the raw frame data, instead we'll make
-        # rendering faster and convert the frame indices to
-        # actual vertices in the index order
-        self.frames = [
-            MD2.convert_indices_for_frame( self.frame, self.triangles )
-            for frame in frames
-            ]
-
     @staticmethod
     def _load_block( stream, format, count ):
         """
@@ -573,6 +540,17 @@ class MD2( object ):
             vertices,
             normals
             )
+
+
+class OptimisedMD2( MD2 ):
+
+    def __init__( self ):
+        super( OptimisedMD2, self ).__init__()
+
+    def load_from_buffer( self, f ):
+        super( OptimisedMD2, self ).load_from_buffer( f )
+
+        self.indices, self.tcs, self.frames = OptimisedMD2.process_vertices( self )
 
     @staticmethod
     def process_vertices( md2 ):
