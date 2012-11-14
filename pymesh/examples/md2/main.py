@@ -1,14 +1,10 @@
 import os
 
-from pymesh.md2 import MD2, OptimisedMD2
+from pymesh.md2 import MD2
 
 def load_mesh( filename ):
     print 'Loading Raw', filename
     mesh = MD2()
-    mesh.load( filename )
-
-    print 'Loading Optimised', filename
-    mesh = OptimisedMD2()
     mesh.load( filename )
 
 def main():
