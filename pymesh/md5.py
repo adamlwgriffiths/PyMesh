@@ -357,7 +357,7 @@ class MD5_Mesh( MD5 ):
             tu = float( tu )
             tv = float( tv )
             start_weight = int( start_weight )
-            weight_elements = int( weight_count )
+            weight_count = int( weight_count )
 
             return MD5_Mesh.vert_layout(
                 tu,
