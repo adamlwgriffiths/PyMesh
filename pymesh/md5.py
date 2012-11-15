@@ -206,6 +206,7 @@ class MD5_Mesh( MD5 ):
     def __init__( self ):
         super( MD5_Mesh, self ).__init__()
 
+        self.md5_version = None
         self.num_joints = None
         self.num_meshes = None
 
