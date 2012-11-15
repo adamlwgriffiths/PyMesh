@@ -189,8 +189,8 @@ class MD5_Mesh( MD5 ):
         [
             'tu',
             'tv',
-            'weight_index',
-            'weights_elements'
+            'start_weight',
+            'weight_count'
             ]
         )
 
@@ -256,7 +256,7 @@ class MD5_Mesh( MD5 ):
         """Processes the MD5 Mesh header.
         """
         line = parse_to( buffer, 'MD5Version' )
-        values = line.split( None )
+        values = line.split( None, 1 )
         self.md5_version = int( values[ 1 ] )
 
         if self.md5_version != MD5.md5_version:
@@ -271,11 +271,11 @@ class MD5_Mesh( MD5 ):
         # this is only present in Doom 3 MD5's
 
         line = parse_to( buffer, 'numJoints' )
-        values = line.split( None )
+        values = line.split( None, 1 )
         self.num_joints = int( values[ 1 ] )
 
         line = parse_to( buffer, 'numMeshes' )
-        values = line.split( None )
+        values = line.split( None, 1 )
         self.num_meshes = int( values[ 1 ] )
 
     def _process_joints( self, buffer, seek_to = True ):
@@ -351,18 +351,18 @@ class MD5_Mesh( MD5 ):
 
             # vert vertIndex ( texU texV ) weightIndex weightElem
             # we ignore the vertIndex as it is implied by order
-            nil, nil, nil, tu, tv, nil, weight_index, weight_elements = values
+            nil, nil, nil, tu, tv, nil, start_weight, weight_count = values
 
             tu = float( tu )
             tv = float( tv )
-            weight_index = int( weight_index )
-            weight_elements = int( weight_elements )
+            start_weight = int( start_weight )
+            weight_elements = int( weight_count )
 
             return MD5_Mesh.vert_layout(
                 tu,
                 tv,
-                weight_index,
-                weight_elements
+                start_weight,
+                weight_count
                 )
 
         def process_tri( buffer ):
@@ -411,12 +411,12 @@ class MD5_Mesh( MD5 ):
             parse_to( buffer, 'mesh' )
 
         line = parse_to( buffer, 'shader' )
-        values = line.split( None )
+        values = line.split( None, 1 )
         # remove quotes
         shader = values[ 1 ][ 1:-1 ]
 
         line = parse_to( buffer, 'numverts' )
-        values = line.split( None )
+        values = line.split( None, 1 )
         num_verts = int( values[ 1 ] )
 
         # process the vertices
@@ -426,7 +426,7 @@ class MD5_Mesh( MD5 ):
             ]
 
         line = parse_to( buffer, 'numtris' )
-        values = line.split( None )
+        values = line.split( None, 1 )
         num_tris = int( values[ 1 ] )
         tris = [
             process_tri( buffer.next() )
@@ -434,7 +434,7 @@ class MD5_Mesh( MD5 ):
             ]
 
         line = parse_to( buffer, 'numweights' )
-        values = line.split( None )
+        values = line.split( None, 1 )
         num_weights = int( values[ 1 ] )
         weights = [
             process_weight( buffer.next() )
