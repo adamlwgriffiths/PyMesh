@@ -297,7 +297,7 @@ class MD5_Mesh( MD5 ):
         Returns a joint_layout named tuple.
         Parent is the parentIndex value.
         Position is in the format [x, y, z].
-        Quaternion is in the format [w, x, y, z].
+        Quaternion is in the format [x, y, z, w].
         """
 
         def process_joint( buffer ):
@@ -328,7 +328,7 @@ class MD5_Mesh( MD5 ):
                 name,
                 index,
                 (pos_x, pos_y, pos_z),
-                (quat_w, quat_x, quat_y, quat_z)
+                (quat_x, quat_y, quat_z, quat_w)
                 )
 
         # find the 'joints {' line
@@ -662,7 +662,7 @@ class MD5_Anim( MD5 ):
 
         Returns a tuple that contains a vertex and a quaternion.
         The vertex is a 3 value tuple.
-        The quaternion is a 4 tuple value
+        The quaternion is a 4 tuple value (x,y,z,w)
         For example:
         ( (0.0, 0.0, 0.0), (1.0, 1.0, 1.0, 1.0) )
         """
@@ -689,7 +689,7 @@ class MD5_Anim( MD5 ):
 
             return (
                 (pos_x, pos_y, pos_z),
-                (quat_w, quat_x, quat_y, quat_z)
+                (quat_x, quat_y, quat_z, quat_w)
                 )
 
         # find the 'baseframe {' line
@@ -720,7 +720,7 @@ class MD5_Anim( MD5 ):
 
         Returns a tuple that contains a vertex and a quaternion.
         The vertex is a 3 value tuple.
-        The quaternion is a 4 tuple value
+        The quaternion is a 4 tuple value (x,y,z,w)
         Be aware, that ANY of these values can be None.
         Once a single None value is found, all proceeding values
         will be None.
@@ -758,7 +758,7 @@ class MD5_Anim( MD5 ):
 
             return (
                 (pos_x, pos_y, pos_z),
-                (quat_w, quat_x, quat_y, quat_z)
+                (quat_x, quat_y, quat_z, quat_w)
                 )
 
         # find the 'hierarchy {' line
