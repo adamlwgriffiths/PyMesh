@@ -1,3 +1,0 @@
-[submodule "contrib/Pyrr"]
-	path = contrib/Pyrr
-	url = git@github.com:adamlwgriffiths/Pyrr.git
