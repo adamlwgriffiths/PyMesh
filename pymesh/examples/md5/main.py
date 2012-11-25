@@ -8,6 +8,35 @@ def load_mesh( filename ):
     md5 = MD5_Mesh()
     md5.load( filename )
 
+    # print the data out for verification
+    print 'version', md5.md5_version
+    print 'num_joints', md5.num_joints
+    print 'num_meshes', md5.num_meshes
+
+    print 'joints'
+    for joint in md5.joints:
+        print joint.name, joint.parent, joint.position, joint.orientation
+
+    print 'meshes'
+    for mesh in md5.meshes:
+        print 'shader', mesh.shader
+        print 'numverts', mesh.numverts
+        for vert in mesh.verts:
+            print 'tu', vert.tu
+            print 'tv', vert.tv
+            print 'start_weight', vert.start_weight
+            print 'weight_count', vert.weight_count
+
+        print 'numtris', mesh.numtris
+        for tri in mesh.tris:
+            print tri
+
+        print 'numweights', mesh.numweights
+        for weight in mesh.weights:
+            print 'joint', weight.joint
+            print 'bias', weight.bias
+            print 'position', weight.position
+
 
 def load_anim( filename ):
     print 'Loading', filename
