@@ -77,11 +77,11 @@ def compute_quaternion_w( x, y, z ):
     Quaternion X, Y and Z components.
     """
     # extract our W quaternion component
-    w = 1.0 - (x * x) - (y * y) - (z * z)
+    w = 1.0 - (x ** 2) - (y ** 2) - (z ** 2)
     if w < 0.0:
         w = 0.0
     else:
-        w = -math.sqrt( w )
+        w = math.sqrt( w )
     return w
 
 
@@ -309,24 +309,24 @@ class MD5_Mesh( MD5 ):
 
             # extract values
             # "boneName" parentIndex ( xPos yPos zPos ) ( xOrient yOrient zOrient )
-            name, index, nil, pos_x, pos_y, pos_z, nil, nil, quat_x, quat_y, quat_z, nil = values
+            name, parent, nil, pos_x, pos_y, pos_z, nil, nil, quat_x, quat_y, quat_z, nil = values
 
             # remove quotes from name
             name = name[ 1:-1 ]
 
             # convert to appropriate type
-            index = int( index )
-            pos_x = float(pos_x)
-            pos_y = float(pos_y)
-            pos_z = float(pos_z)
-            quat_x = float(quat_x)
-            quat_y = float(quat_y)
-            quat_z = float(quat_z)
+            parent = int( parent )
+            pos_x = float( pos_x )
+            pos_y = float( pos_y )
+            pos_z = float( pos_z )
+            quat_x = float( quat_x )
+            quat_y = float( quat_y )
+            quat_z = float( quat_z )
             quat_w = compute_quaternion_w( quat_x, quat_y, quat_z )
 
             return MD5_Mesh.joint_layout(
                 name,
-                index,
+                parent,
                 (pos_x, pos_y, pos_z),
                 (quat_x, quat_y, quat_z, quat_w)
                 )
