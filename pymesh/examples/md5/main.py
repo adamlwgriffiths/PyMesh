@@ -15,15 +15,16 @@ def load_mesh( filename ):
 
     print 'joints'
     for joint in md5.joints:
-        print joint
-        print joint.name, joint.parent, joint.position, joint.orientation
+        print 'name', joint.name
+        print 'parent', joint.parent
+        print 'position', joint.position
+        print 'orientation', joint.orientation
 
     print 'meshes'
     for mesh in md5.meshes:
         print 'shader', mesh.shader
+
         print 'numverts', mesh.num_verts
-        #for index in range( mesh.num_verts ):
-        #    vert = mesh.vertex( index )
         for vert in mesh.vertices:
             print 'tcs', vert.tcs
             print 'start_weight', vert.start_weight
@@ -31,11 +32,9 @@ def load_mesh( filename ):
 
         print 'numtris', mesh.num_tris
         for tri in mesh.tris:
-            print tri
+            print 'tri', tri
 
         print 'numweights', mesh.num_weights
-        #for index in range( mesh.num_weights ):
-        #    weight = mesh.weight( index )
         for weight in mesh.weights:
             print 'joint', weight.joint
             print 'bias', weight.bias
@@ -47,6 +46,39 @@ def load_anim( filename ):
 
     md5 = MD5_Anim()
     md5.load( filename )
+
+    print 'version', md5.md5_version
+    print 'num_frames', md5.num_frames
+
+    print 'hierarchy'
+    print 'num_joints', md5.hierarchy.num_joints
+    for joint in md5.hierarchy:
+        print 'name', joint.name
+        print 'parent', joint.parent
+        print 'num_components', joint.num_components
+        print 'frame', joint.frame
+
+    print 'bounds'
+    print 'num_bounds', md5.bounds.num_bounds
+    for bounds in md5.bounds:
+        print 'minimum', bounds[ 0 ]
+        print 'maximum', bounds[ 1 ]
+
+    print 'base frame'
+    print 'num_bones', md5.base_frame.num_bones
+    for bone in md5.base_frame:
+        print 'position', bone.position
+        print 'orientation', bone.orientation
+
+    print 'frames'
+    print 'num_frames', md5.num_frames
+    for frame in md5.frames:
+        print 'joints'
+        print 'num_joints', frame.num_joints
+        for joint in frame:
+            print 'position', joint.position
+            print 'orientation', joint.orientation
+
 
 def main():
     # load all md5 files in our data directory
