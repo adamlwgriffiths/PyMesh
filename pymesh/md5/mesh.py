@@ -435,6 +435,20 @@ class MD5_Mesh( MD5 ):
     def num_meshes( self ):
         return len( self.meshes )
 
+    @property
+    def num_verts( self ):
+        total = 0
+        for mesh in self.meshes:
+            total += mesh.num_verts
+        return total
+
+    @property
+    def num_tris( self ):
+        total = 0
+        for mesh in self.meshes:
+            total += mesh.num_tris
+        return total
+
     def joint( self, index ):
         return self.joints.joint( index )
 
