@@ -10,7 +10,9 @@ Using a single data structure to represent all loaded mesh formats is not just a
 
 Many times I've found myself wanting to load a simple mesh, and finding the data caught up in a scene graph with lights, camera and complex materials which are all irrelevant.
 
-This also means that as new mesh formats and features are added, existing code will not be affected.
+This also means that as new mesh formats and features are added, existing code needs to be updated.
+
+PyMesh doesn't do this. Each mesh loader exposes the relevant functionality for that mesh.
 
 
 __PyMesh is a good foundation for a 3D library.__
