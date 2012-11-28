@@ -15,23 +15,27 @@ def load_mesh( filename ):
 
     print 'joints'
     for joint in md5.joints:
+        print joint
         print joint.name, joint.parent, joint.position, joint.orientation
 
     print 'meshes'
     for mesh in md5.meshes:
         print 'shader', mesh.shader
-        print 'numverts', mesh.numverts
-        for vert in mesh.verts:
-            print 'tu', vert.tu
-            print 'tv', vert.tv
+        print 'numverts', mesh.num_verts
+        #for index in range( mesh.num_verts ):
+        #    vert = mesh.vertex( index )
+        for vert in mesh.vertices:
+            print 'tcs', vert.tcs
             print 'start_weight', vert.start_weight
             print 'weight_count', vert.weight_count
 
-        print 'numtris', mesh.numtris
+        print 'numtris', mesh.num_tris
         for tri in mesh.tris:
             print tri
 
-        print 'numweights', mesh.numweights
+        print 'numweights', mesh.num_weights
+        #for index in range( mesh.num_weights ):
+        #    weight = mesh.weight( index )
         for weight in mesh.weights:
             print 'joint', weight.joint
             print 'bias', weight.bias
