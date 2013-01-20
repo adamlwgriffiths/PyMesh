@@ -8,6 +8,57 @@ def load( filename ):
     obj = OBJ()
     obj.load( filename )
 
+    print "Mesh"
+    for mesh in obj.model.meshes:
+        print '\tName:', mesh[ 'name' ]
+        print '\tGroups:', mesh['groups']
+
+    if obj.shadow:
+        print "Shadow"
+        for mesh in obj.shadow.meshes:
+            print '\tName:', mesh[ 'name' ]
+            print '\tGroups:', mesh['groups']
+
+    if obj.trace:
+        print "Trace"
+        for mesh in obj.trace.meshes:
+            print '\tName:', mesh[ 'name' ]
+            print '\tGroups:', mesh['groups']
+
+    print "Materials"
+    for material in obj.materials:
+        for key, layer in material.materials.items():
+            print "\tmaterial key:", key
+            print "\tname:", layer['name']
+            print "\tambient:", layer['ambient']
+            print "\tdiffuse:", layer['diffuse']
+            print "\tspecular:", layer['specular']
+            print "\thalo:", layer['alpha']
+            print "\tshine:", layer['shine']
+            print "\tillum:", layer['illum']
+            print "\tsharpness:", layer['sharpness']
+            print "\treflectivity:", layer['reflectivity']
+            print "\tdensity:", layer['density']
+            print "\tanti-alias:", layer['anti-alias']
+
+            print "\ttexture"
+            print "\t\tambient:", layer['textures']['ambient']
+            print "\t\tdiffuse:", layer['textures']['diffuse']
+            print "\t\tspecular:", layer['textures']['specular']
+            print "\t\tshine:", layer['textures']['shine']
+            print "\t\tbump:", layer['textures']['bump']
+            print "\t\tdisplacement:", layer['textures']['displacement']
+            print "\t\tdecal:", layer['textures']['decal']
+
+        print "\ttextures"
+        for texture in material.textures:
+            print "\t\t", texture
+
+    print "All Textures"
+    for texture in obj.textures:
+        print "\t", texture
+
+
 def main():
     # load all .obj files in our data directory
     # get the path relative to our examples file
