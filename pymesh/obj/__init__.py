@@ -1368,8 +1368,8 @@ class OBJ( object ):
         self.model = None
         self.shadow = None
         self.trace = None
-        self.textures = []
-        self.materials = []
+        self.textures = set([])
+        self.materials = set([])
 
     def load( self, filename ):
         """
@@ -1406,12 +1406,19 @@ class OBJ( object ):
                 self.trace = self._parse_obj_mesh( f, path )
 
         # process any materials
-        for material in self.model.materials:
+        self.textures = set([])
+        self.materials = set([])
+        for material_path in self.model.materials:
             # convert any further filenames to be relative to the file
-            material = os.path.join( path, material )
+            material_path = os.path.join( path, material_path )
 
-            with open( material, 'r' ) as f:
-                self._parse_obj_material( f )
+            with open( material_path, 'r' ) as f:
+                material = self._parse_obj_material( f )
+
+            self.materials.add( material )
+
+            # add the textures to our list of textures
+            self.textures.update( material.textures )
 
     def _parse_obj_mesh( self, buffer, path ):
         # we will store our values as a property of this method
