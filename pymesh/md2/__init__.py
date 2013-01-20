@@ -446,12 +446,10 @@ class MD2( object ):
         vertex_indices = vertex_indices.flatten()
         tc_indices = tc_indices.flatten()
 
-        triangles = MD2.triangle_layout(
+        return MD2.triangle_layout(
             vertex_indices,
             tc_indices
             )
-
-        return triangles
 
     @staticmethod
     def read_frames( f, header ):
