@@ -15,30 +15,30 @@ def load_mesh( filename ):
 
     print 'joints'
     for joint in md5.joints:
-        print 'name', joint.name
-        print 'parent', joint.parent
-        print 'position', joint.position
-        print 'orientation', joint.orientation
+        print '\tname', joint.name
+        print '\tparent', joint.parent
+        print '\tposition', joint.position
+        print '\torientation', joint.orientation
 
     print 'meshes'
     for mesh in md5.meshes:
-        print 'shader', mesh.shader
+        print '\tshader', mesh.shader
 
-        print 'numverts', mesh.num_verts
+        print '\tnumverts', mesh.num_verts
         for vert in mesh.vertices:
-            print 'tcs', vert.tcs
-            print 'start_weight', vert.start_weight
-            print 'weight_count', vert.weight_count
+            print '\t\ttcs', vert.tcs
+            print '\t\tstart_weight', vert.start_weight
+            print '\t\tweight_count', vert.weight_count
 
-        print 'numtris', mesh.num_tris
+        print '\tnumtris', mesh.num_tris
         for tri in mesh.tris:
-            print 'tri', tri
+            print '\t\ttri', tri
 
-        print 'numweights', mesh.num_weights
+        print '\tnumweights', mesh.num_weights
         for weight in mesh.weights:
-            print 'joint', weight.joint
-            print 'bias', weight.bias
-            print 'position', weight.position
+            print '\t\tjoint', weight.joint
+            print '\t\tbias', weight.bias
+            print '\t\tposition', weight.position
 
 
 def load_anim( filename ):
@@ -53,31 +53,31 @@ def load_anim( filename ):
     print 'hierarchy'
     print 'num_joints', md5.hierarchy.num_joints
     for joint in md5.hierarchy:
-        print 'name', joint.name
-        print 'parent', joint.parent
-        print 'num_components', joint.num_components
-        print 'frame', joint.frame
+        print '\tname', joint.name
+        print '\tparent', joint.parent
+        print '\tnum_components', joint.num_components
+        print '\tframe', joint.frame
 
     print 'bounds'
     print 'num_bounds', md5.bounds.num_bounds
     for bounds in md5.bounds:
-        print 'minimum', bounds[ 0 ]
-        print 'maximum', bounds[ 1 ]
+        print '\tminimum', bounds[ 0 ]
+        print '\tmaximum', bounds[ 1 ]
 
     print 'base frame'
     print 'num_bones', md5.base_frame.num_bones
     for bone in md5.base_frame:
-        print 'position', bone.position
-        print 'orientation', bone.orientation
+        print '\tposition', bone.position
+        print '\torientation', bone.orientation
 
     print 'frames'
     print 'num_frames', md5.num_frames
     for frame in md5.frames:
-        print 'joints'
-        print 'num_joints', frame.num_joints
+        print '\tjoints'
+        print '\tnum_joints', frame.num_joints
         for joint in frame:
-            print 'position', joint.position
-            print 'orientation', joint.orientation
+            print '\t\tposition', joint.position
+            print '\t\torientation', joint.orientation
 
 
 def main():
