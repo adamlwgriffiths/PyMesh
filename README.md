@@ -20,6 +20,15 @@ __PyMesh is a good foundation for a 3D library.__
 PyMesh processes mesh formats and exposes them in a format that is easy for you to process.
 Because PyMesh doesn't do any 3D graphics, it is platform and library independent.
 
+Example
+-------
+
+Loading a mesh is as simple as calling 'load' on the appropriate module.
+```
+from pymesh.obj import OBJ
+obj = OBJ()
+obj.load('my_mesh.obj')
+```
 
 Features
 --------
