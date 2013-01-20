@@ -9,9 +9,15 @@ def load( filename ):
     obj.load( filename )
 
     print "Mesh"
+    print '\tnum vertices:', len(obj.model.vertices)
+    print '\tnum normals:', len(obj.model.normals)
+    print '\tnum texture_coords:', len(obj.model.texture_coords)
+    print '\tnum materials:', len(obj.model.materials)
+    print '\tnum meshes:', len(obj.model.meshes)
+    print "Sub meshes"
     for mesh in obj.model.meshes:
-        print '\tName:', mesh[ 'name' ]
-        print '\tGroups:', mesh['groups']
+        print '\tname:', mesh[ 'name' ]
+        print '\tgroups:', mesh['groups']
 
     if obj.shadow:
         print "Shadow"
