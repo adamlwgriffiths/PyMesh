@@ -226,7 +226,7 @@ class OBJ( object ):
         self.textures = set([])
         self.materials = set([])
 
-    def load( self, filename ):
+    def load( self, filename, ignore_smoothing_groups = True ):
         """
         Reads the OBJ data from the existing
         specified filename.
@@ -275,10 +275,10 @@ class OBJ( object ):
             # add the textures to our list of textures
             self.textures.update( material.textures )
 
-    def _parse_obj_mesh( self, buffer, path ):
+    def _parse_obj_mesh( self, buffer, path, ignore_smoothing_groups = True ):
         # we will store our values as a property of this method
         # this lets the inner functions access them
-        data = OBJ_Mesh()
+        data = OBJ_Mesh( ignore_smoothing_groups )
 
         buffers = ArgumentBufferStack()
         buffers.push( buffer )

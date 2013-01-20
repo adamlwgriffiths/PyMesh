@@ -197,8 +197,10 @@ class OBJ_Mesh( OBJ_Loader ):
     default_group = 'default'
 
 
-    def __init__( self ):
+    def __init__( self, ignore_smoothing_groups = True ):
         super( OBJ_Mesh, self ).__init__()
+
+        self._ignore_smoothing_groups = ignore_smoothing_groups
 
         self.vertices = []
         self.texture_coords = []
@@ -484,10 +486,13 @@ class OBJ_Mesh( OBJ_Loader ):
         # don't copy the mesh if we haven't actually set
         # any faces yet
         # this is because we may have multiple 'setup' statements
-        if self._current_mesh_has_data():
-            self._push_current_mesh()
-        else:
+        if self._ignore_smoothing_groups:
             self._ensure_current_mesh()
+        else:
+            if self._current_mesh_has_data():
+                self._push_current_mesh()
+            else:
+                self._ensure_current_mesh()
 
         # set the smoothing group
         if value == 'off' or value == '0':
