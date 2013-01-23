@@ -48,7 +48,7 @@ def load_anim( filename ):
     md5.load( filename )
 
     print 'version', md5.md5_version
-    print 'num_frames', md5.num_frames
+    print 'frame_rate', md5.frame_rate
 
     print 'hierarchy'
     print 'num_joints', md5.hierarchy.num_joints
