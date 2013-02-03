@@ -13,8 +13,8 @@ class MD5_Hierarchy( object ):
         [
             'name',
             'parent',
-            'num_components',
-            'frame'
+            'flags',
+            'start_index'
             ]
         )
 
@@ -23,8 +23,8 @@ class MD5_Hierarchy( object ):
 
         self.names = None
         self.parent_indices = None
-        self.num_components = None
-        self.frame_indices = None
+        self.flags = None
+        self.start_indices = None
 
         self._process_hierarchy( buffer, num_joints, seek_to )
 
@@ -36,8 +36,8 @@ class MD5_Hierarchy( object ):
         return MD5_Hierarchy.joint_layout(
             self.names[ index ],
             self.parent_indices[ index ],
-            self.num_components[ index ],
-            self.frame_indices[ index ]
+            self.flags[ index ],
+            self.start_indices[ index ]
             )
 
     def __iter__( self ):
@@ -54,7 +54,7 @@ class MD5_Hierarchy( object ):
         removed by our pre-parser 'process_md5_buffer'.
 
         Joints follow the format:
-        "boneName" parentIndex numComp frameIndex // parentName ( tX tY tZ qX qY qZ )
+        "boneName" parentIndex flags start_index // parentName ( tX tY tZ qX qY qZ )
 
         Data to the right of the comment indicator is ignored.
 
@@ -68,41 +68,44 @@ class MD5_Hierarchy( object ):
             values = buffer.split( None )
 
             # extract values
-            # "boneName" parentIndex numComp frameIndex
-            name, parent_index, num_components, frame_index = values
+            # "boneName" parentIndex flags startIndex
+            name, parent_index, flags, start_index = values
 
             # remove quotes from name
             name = name[ 1:-1 ]
 
             # convert to appropriate type
             parent_index = int( parent_index )
-            num_components = int( num_components )
-            frame_index = int( frame_index )
+            flags = int( flags )
+            start_index = int( start_index )
 
             return (
                 name,
                 parent_index,
-                num_components,
-                frame_index
+                flags,
+                start_index
                 )
 
         # find the 'hierarchy {' line
         if seek_to:
             parse_to( buffer, 'hierarchy' )
 
+        #
+        # TODO: convert this to a single N * 3 array and then extract using slices
+        #
         self.names = []
         self.parent_indices = numpy.empty( num_joints, dtype = 'int' )
-        self.num_components = numpy.empty( num_joints, dtype = 'int' )
-        self.frame_indices = numpy.empty( num_joints, dtype = 'int' )
+        self.flags = numpy.empty( num_joints, dtype = 'int' )
+        self.start_indices = numpy.empty( num_joints, dtype = 'int' )
 
         # iterate through our specified number of joints
         for index in range( num_joints ):
-            name, parent_index, num_components, frame_index = process_joint( buffer.next() )
+            name, parent_index, flags, start_index = process_joint( buffer.next() )
 
             self.names.append( name )
             self.parent_indices[ index ] = parent_index
-            self.num_components[ index ] = num_components
-            self.frame_indices[ index ] = frame_index
+            self.flags[ index ] = flags
+            self.start_indices[ index ] = start_index
 
 
 class MD5_Bounds( object ):
@@ -176,6 +179,7 @@ class MD5_Bounds( object ):
             dtype = 'float'
             )
 
+
 class MD5_BaseFrame( object ):
 
     bone_layout = namedtuple(
@@ -223,6 +227,7 @@ class MD5_BaseFrame( object ):
         Returns a tuple that contains a vertex and a quaternion.
         The vertex is a 3 value tuple.
         The quaternion is a 4 tuple value (x,y,z,w)
+        The W component is calculated based on the x,y,z values.
         For example:
         ( (0.0, 0.0, 0.0), (1.0, 1.0, 1.0, 1.0) )
         """
@@ -258,74 +263,31 @@ class MD5_BaseFrame( object ):
         self.orientations = numpy.empty( (num_joints, 4 ), dtype = 'float' )
 
         # iterate through our specified number of joints
-        for index in range( num_joints ):
-            position, orientation = process_bone( buffer.next() )
-            
-            self.positions[ index ] = position
-            self.orientations[ index ] = orientation
+        for position, orientation in zip( self.positions, self.orientations ):
+            position[:], orientation[:] = process_bone( buffer.next() )
+
 
 class MD5_Frame( object ):
-
-    joint_layout = namedtuple(
-        'MD5_FrameJoint',
-        [
-            'position',
-            'orientation'
-            ]
-        )
 
     def __init__( self, buffer, seek_to = True ):
         super( MD5_Frame, self ).__init__()
 
-        self.positions = None
-        self.orientations = None
+        self.values = None
 
         self._process_frame( buffer, seek_to )
 
     @property
-    def num_joints( self ):
-        return len( self.positions )
+    def num_animated_components( self ):
+        return self.values.size
 
-    def joint( self, index ):
-        return MD5_Frame.joint_layout(
-            self.positions[ index ],
-            self.orientations[ index ]
-            )
-
-    def __iter__( self ):
-        return self.next()
-
-    def next( self ):
-        for index in range( self.num_joints ):
-            yield self.joint( index )
+    def value( self, index ):
+        return self.values[ index ]
 
     def _process_frame( self, buffer, seek_to = True ):
         """Processes a frame block.
 
         The format specifies that there are 'self.num_animated_components' float
         values. It does not specify how many lines (which would be nicer).
-        It is not trivial to perform this. So we will simply iterate until the
-        end of a block marked with a line starting with '}'.
-
-        This should be valid as any invalid lines or comments will be
-        removed by our pre-parser 'process_md5_buffer'.
-
-        Joints follow the format:
-        xPos yPos zPos xOrient yOrient zOrient
-
-        Each value is optional.
-
-        Returns a tuple that contains a vertex and a quaternion.
-        The vertex is a 3 value tuple.
-        The quaternion is a 4 tuple value (x,y,z,w)
-        Be aware, that ANY of these values can be None.
-        Once a single None value is found, all proceeding values
-        will be None.
-        A None value indicates that it should be inherited from
-        the baseframe values.
-        For example:
-        ( (0.0, 0.0, 0.0), (1.0, 1.0, 1.0, 1.0) )
-        ( (0.0, 0.0, None), (None, None, None, None) )
         """
 
         def process_bone( buffer ):
@@ -339,42 +301,22 @@ class MD5_Frame( object ):
             # when we add padding
             values = map( float, values )
 
-            # extract values
-            # xPos yPos zPos xOrient yOrient zOrient
-            # because the values are optional, we need to use
-            # our tuple extraction routine
-            values = utils.extract_tuple( values, 6, None )
-            pos_x, pos_y, pos_z, quat_x, quat_y, quat_z = values
-
-            quat_w = None
-            if quat_x and quat_y and quat_z:
-                quat_w = compute_quaternion_w( quat_x, quat_y, quat_z )
-
-            return (
-                (pos_x, pos_y, pos_z),
-                (quat_x, quat_y, quat_z, quat_w)
-                )
+            return values
 
         # find the 'hierarchy {' line
         if seek_to:
             parse_to( buffer, 'frame' )
 
         # iterate through our specified number of joints
-        positions = []
-        orientations = []
+        values = []
 
         while True:
             line = buffer.next()
             if line.startswith( '}' ):
                 break
-            position, orientation = process_bone( line )
+            values += list( process_bone( line ) )
 
-            positions.append( position )
-            orientations.append( orientation )
-
-        # don't set a dtype as some may be None
-        self.positions = numpy.array( positions )
-        self.orientations = numpy.array( orientations )
+        self.values = numpy.array( values, dtype = 'float' )
 
 
 class MD5_Anim( MD5 ):
@@ -471,4 +413,9 @@ class MD5_Anim( MD5 ):
             MD5_Frame( buffer )
             for index in range( num_frames )
             ]
+
+        # validate our frame data
+        for frame in self.frames:
+            if frame.num_animated_components != num_animated_components:
+                raise ValueError("Number of animated components doesn't match")
 
